@@ -1,13 +1,22 @@
 class UserModel {
   final String nickname;
   final String profileImageUrl;
+  final String role;
+  final String socialId;
 
-  UserModel({required this.nickname, required this.profileImageUrl});
+  UserModel({
+    required this.nickname,
+    required this.profileImageUrl,
+    required this.role,
+    required this.socialId,
+  });
 
-  factory UserModel.fromKakaoUser(dynamic kakaoUser) {
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      nickname: kakaoUser.kakaoAccount?.profile?.nickname ?? 'Unknown',
-      profileImageUrl: kakaoUser.kakaoAccount?.profile?.thumbnailImageUrl ?? '',
+      nickname: json['nickname'],
+      profileImageUrl: json['profileImage'] ?? '',
+      role: json['role'],
+      socialId: json['socialId'],
     );
   }
 }
