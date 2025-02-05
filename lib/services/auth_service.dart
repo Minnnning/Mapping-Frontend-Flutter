@@ -108,4 +108,46 @@ class AuthService {
       print('로그아웃 실패: $error');
     }
   }
+
+  // 토큰 재발급
+  Future<UserModel?> expiredToken(UserProvider userProvider) async {
+    try {
+      String? oldAccessToken = await _secureStorage.read(key: 'accessToken');
+      String? refreshToken = await _secureStorage.read(key: 'refreshToken');
+
+      final response = await _dio.get(
+        'https://api.mapping.kro.kr/api/v2/member/token-reissue',
+        options: Options(headers: {
+          'Authorization': 'Bearer $oldAccessToken',
+          'Authorization-Refresh': 'Bearer $refreshToken',
+          'accept': '*/*',
+        }),
+      );
+
+      if (response.statusCode == 200 && response.data['success']) {
+        String? newAccessToken = response.headers['authorization']?.first.replaceFirst('Bearer ', '');
+        String? newRefreshToken = response.headers['authorization-refresh']?.first.replaceFirst('Bearer ', '');
+
+        if (newAccessToken != null && newRefreshToken != null) {
+          await _secureStorage.write(key: 'accessToken', value: newAccessToken);
+          await _secureStorage.write(key: 'refreshToken', value: newRefreshToken);
+          print('새 토큰 저장 완료');
+
+          // 토큰 갱신 후 유저 정보 다시 가져오기
+          return await fetchUser(userProvider);
+        }
+      }
+
+      // 예외 상황: 토큰 재발급 실패 시 로그아웃 처리
+      print('토큰 재발급 실패, 로그아웃 진행');
+      await logout(userProvider);
+      return null;
+    } catch (error) {
+      print('토큰 재발급 오류: $error');
+
+      // 에러 발생 시 로그아웃 처리
+      await logout(userProvider);
+      return null;
+    }
+  }
 }
