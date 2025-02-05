@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart';
-import 'screens/login_screen.dart';
 import 'package:provider/provider.dart';
+
+import 'screens/map_screen.dart';
 import 'providers/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await dotenv.load(fileName: '.env');
 
-  KakaoSdk.init(nativeAppKey: dotenv.get('KAKAO_NATIVE_APP_KEY'));
+  final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
+  if (kakaoNativeAppKey == null) {
+    throw Exception('KAKAO_NATIVE_APP_KEY is not set in the .env file');
+  }
+  KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
 
   runApp(
     MultiProvider(
@@ -27,8 +33,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kakao Login Demo',
-      home: const LoginScreen(),
+      title: 'Flutter Kakao Map App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MapScreen(), // MapScreen을 초기 화면으로 설정
     );
   }
 }
