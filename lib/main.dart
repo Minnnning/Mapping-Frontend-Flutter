@@ -10,8 +10,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: '.env');
-
   final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
+
   if (kakaoNativeAppKey == null) {
     throw Exception('KAKAO_NATIVE_APP_KEY is not set in the .env file');
   }
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MapScreen(), // MapScreen을 초기 화면으로 설정
+      home: const MapScreen(), // MapScreen을 초기 화면으로 설정
     );
   }
 }

@@ -15,6 +15,7 @@ class MapScreen extends StatelessWidget {
           target: LatLng(36.629014, 127.456622), 
           zoom: 16,
         ),
+        myLocationEnabled: true,
       ),
     );
   }
