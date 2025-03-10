@@ -42,6 +42,7 @@ dependencies:
   google_maps_flutter: ^2.10.0
   flutter_config: ^2.0.2 #ios앱용 근데 안드 실행시 충돌
   geolocator: ^13.0.2
+  http: ^1.3.0
 
 dev_dependencies:
   flutter_test:
