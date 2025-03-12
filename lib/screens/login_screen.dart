@@ -56,7 +56,8 @@ class LoginScreen extends StatelessWidget {
                     SizedBox(width: 8),
                     Text(
                       "프로필",
-                      style: TextStyle(fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ],
                 ),
@@ -110,15 +111,110 @@ class LoginScreen extends StatelessWidget {
                 return user == null
                     ? GestureDetector(
                         onTap: () => _handleLogin(context),
-                        child: Image.asset(
-                          'assets/images/kakao_login_large_wide.png',
-                          height: 40,
+                        child: Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0), // 마진 추가
+                          child: Image.asset(
+                            'assets/images/kakao_login_large_wide.png',
+                            height: 40,
+                          ),
                         ),
                       )
-                    : const SizedBox.shrink(); // 로그인 상태에서는 숨김
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+                        children: [
+                          Text(
+                            '내 활동',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16), // 강조 (선택)
+                          ),
+                          SizedBox(height: 1), // 텍스트와 버튼 간격 줄이기
+                          TextButton(
+                            onPressed: () {
+                              print('TextButton 클릭됨');
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero, // 기본 패딩 제거
+                              alignment: Alignment.centerLeft, // 왼쪽 정렬
+                              foregroundColor: Colors.black,
+                            ),
+                            child: Text('📝 내 메모'),
+                          ),
+                          Divider(
+                            thickness: 1,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              print('TextButton 클릭됨');
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              alignment: Alignment.centerLeft,
+                              foregroundColor: Colors.black,
+                            ),
+                            child: Text('👍 좋아요 누른 메모'),
+                          ),
+                          Divider(
+                            thickness: 1,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              print('TextButton 클릭됨');
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              alignment: Alignment.centerLeft,
+                              foregroundColor: Colors.black,
+                            ),
+                            child: Text('💬 댓글 단 메모'),
+                          ),
+                        ],
+                      );
               },
             ),
           ),
+          Consumer<UserProvider>(
+            builder: (context, userProvider, child) {
+              UserModel? user = userProvider.user;
+              return user != null // 로그인한 경우만 Column 표시
+                  ? Column(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Divider(
+                            color: boxGray,
+                            thickness: 1,
+                            indent: 16,
+                            endIndent: 16,
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: boxGray,
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                          width: double.infinity,
+                          child: TextButton(
+                            onPressed: () {
+                              print('TextButton 클릭됨');
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              alignment: Alignment.centerLeft,
+                              foregroundColor: Colors.black,
+                            ),
+                            child: Text('🚫 차단한 사용자'),
+                          ),
+                        ),
+                      ],
+                    )
+                  : SizedBox(); // 로그인하지 않은 경우 빈 공간 반환
+            },
+          ),
+
           Expanded(child: Center()),
           // 문의 이메일
           const Padding(
