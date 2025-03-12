@@ -16,6 +16,7 @@ void main() async {
     throw Exception('KAKAO_NATIVE_APP_KEY is not set in the .env file');
   }
   KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
+  // var key = await KakaoSdk.origin;
 
   runApp(
     MultiProvider(
