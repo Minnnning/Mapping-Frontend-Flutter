@@ -24,7 +24,9 @@ class LoginScreen extends StatelessWidget {
       builder: (context, userProvider, child) {
         final UserModel? user = userProvider.user;
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
+            backgroundColor: Colors.white,
             title: const Text('내 정보'),
             actions: [
               if (user != null)
