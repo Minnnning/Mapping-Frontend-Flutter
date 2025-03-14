@@ -107,20 +107,23 @@ class _ResizableSearchBarState extends State<ResizableSearchBar> {
                                             NetworkImage(user.profileImageUrl),
                                         radius: 20,
                                       )
-                                    : const CircleAvatar(
+                                    : CircleAvatar(
                                         backgroundColor: Colors.grey,
                                         radius: 20,
-                                        child: Icon(Icons.person,
-                                            size: 24, color: Colors.white),
+                                        child: Text(
+                                          user.nickname[0],
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                               )
                             : TextButton(
                                 style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero, // 불필요한 패딩 제거
-                                  minimumSize: Size(45, 45), // 버튼 크기 지정
-                                  shape: const CircleBorder(
-                                    side: BorderSide(color: Colors.grey),
-                                  ),
+                                  padding: EdgeInsets.zero, // 모든 패딩 제거
+                                  minimumSize: Size.zero,
                                 ),
                                 onPressed: () {
                                   Navigator.push(
@@ -130,13 +133,16 @@ class _ResizableSearchBarState extends State<ResizableSearchBar> {
                                             const LoginScreen()),
                                   );
                                 },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    "로그인",
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.grey,
+                                  radius: 20,
+                                  child: Text(
+                                    'Login',
                                     style: TextStyle(
-                                        color: Colors.grey, fontSize: 14),
-                                    textAlign: TextAlign.center,
+                                      fontSize: 13,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               );

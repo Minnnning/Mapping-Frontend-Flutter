@@ -86,8 +86,21 @@ class LoginScreen extends StatelessWidget {
                       backgroundImage: NetworkImage(user!.profileImageUrl),
                       radius: 25,
                     )
-                  : const Icon(Icons.account_circle, size: 50),
-              const SizedBox(width: 10),
+                  : CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      radius: 25,
+                      child: Text(
+                        user!.nickname[0],
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+              const SizedBox(
+                width: 10,
+              ),
               Text(
                 user?.nickname ?? '로그인이 필요합니다.',
                 style: Theme.of(context).textTheme.titleMedium,
