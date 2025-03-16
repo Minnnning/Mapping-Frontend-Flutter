@@ -57,7 +57,6 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  /// 프로필 정보 섹션
   Widget buildProfileSection(BuildContext context, UserModel? user) {
     return Container(
       decoration: BoxDecoration(
@@ -81,30 +80,47 @@ class LoginScreen extends StatelessWidget {
           const SizedBox(height: 5),
           Row(
             children: [
-              user?.profileImageUrl.isNotEmpty == true
+              user != null && user.profileImageUrl.isNotEmpty
                   ? CircleAvatar(
-                      backgroundImage: NetworkImage(user!.profileImageUrl),
+                      backgroundImage: NetworkImage(user.profileImageUrl),
                       radius: 25,
                     )
                   : CircleAvatar(
                       backgroundColor: Colors.grey,
                       radius: 25,
-                      child: Text(
-                        user!.nickname[0],
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: user != null
+                          ? Text(
+                              user.nickname[0],
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 40,
+                            ), // 로그인 안 된 경우 기본 아이콘
                     ),
-              const SizedBox(
-                width: 10,
-              ),
+              const SizedBox(width: 10),
               Text(
                 user?.nickname ?? '로그인이 필요합니다.',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
+              Expanded(child: SizedBox()),
+              if (user != null) // 로그인한 경우에만 프로필 변경 버튼 표시
+                TextButton(
+                  onPressed: () {
+                    print('프로필 변경 클릭됨');
+                    // TODO: 프로필 변경 기능 추가
+                  },
+                  style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: mainColor // 버튼 색상 설정
+                      ),
+                  child: const Text('프로필 변경'),
+                ),
             ],
           ),
         ],
