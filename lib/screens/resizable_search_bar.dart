@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import 'login_screen.dart';
+import './profile_button.dart';
+import './custom_search_bar.dart';
 
 class ResizableSearchBar extends StatefulWidget {
   const ResizableSearchBar({Key? key}) : super(key: key);
@@ -11,7 +10,7 @@ class ResizableSearchBar extends StatefulWidget {
 }
 
 class _ResizableSearchBarState extends State<ResizableSearchBar> {
-  double _heightFactor = 0.15; // 기본 높이 (최소)
+  double _heightFactor = 0.15;
   final double _minHeight = 0.15;
   final double _midHeight = 0.5;
   final double _maxHeight = 0.85;
@@ -55,7 +54,6 @@ class _ResizableSearchBarState extends State<ResizableSearchBar> {
           ),
           child: Column(
             children: [
-              // 드래그 핸들
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 width: 40,
@@ -65,94 +63,16 @@ class _ResizableSearchBarState extends State<ResizableSearchBar> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              // 검색바 + 로그인 버튼
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          hintText: '검색어 입력',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Consumer<UserProvider>(
-                      builder: (context, userProvider, child) {
-                        final user = userProvider.user;
-                        final bool isLoggedIn = user != null;
-                        final bool hasProfileImage =
-                            isLoggedIn && user.profileImageUrl.isNotEmpty;
-
-                        return isLoggedIn
-                            ? TextButton(
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero, // 모든 패딩 제거
-                                  minimumSize: Size.zero,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LoginScreen()),
-                                  );
-                                },
-                                child: hasProfileImage
-                                    ? CircleAvatar(
-                                        backgroundImage:
-                                            NetworkImage(user.profileImageUrl),
-                                        radius: 20,
-                                      )
-                                    : CircleAvatar(
-                                        backgroundColor: Colors.grey,
-                                        radius: 20,
-                                        child: Text(
-                                          user.nickname[0],
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                              )
-                            : TextButton(
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero, // 모든 패딩 제거
-                                  minimumSize: Size.zero,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LoginScreen()),
-                                  );
-                                },
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.grey,
-                                  radius: 20,
-                                  child: Text(
-                                    'Login',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              );
-                      },
-                    ),
+                    CustomSearchBar(),
+                    SizedBox(width: 8),
+                    ProfileButton(),
                   ],
                 ),
               ),
-
-              // 중간/최대 높이에서만 추가 내용 표시
               if (_heightFactor > _minHeight + 0.01)
                 const Expanded(
                   child: Center(
