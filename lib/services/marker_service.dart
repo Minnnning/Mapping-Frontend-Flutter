@@ -15,7 +15,7 @@ class MarkerService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data =
             json.decode(utf8.decode(response.bodyBytes));
-
+        print('memo 요청');
         if (data['success'] == true) {
           return data['data'].map<Marker>((memo) {
             return Marker(
