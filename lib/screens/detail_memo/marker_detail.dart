@@ -5,7 +5,9 @@ void showMarkerDetail(BuildContext context, Map<String, dynamic> memo) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true, // ✅ 높이 조정 가능하게 설정
-    builder: (context) {
+    enableDrag: true,
+    showDragHandle: true,
+    builder: (BuildContext context) {
       return FutureBuilder<Map<String, dynamic>?>(
         future: MarkerDetailService.fetchMemoDetail(memo['id']), // API 요청
         builder: (context, snapshot) {
@@ -26,7 +28,6 @@ void showMarkerDetail(BuildContext context, Map<String, dynamic> memo) {
 
           return Container(
             padding: const EdgeInsets.all(16),
-            height: 350,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -39,14 +40,29 @@ void showMarkerDetail(BuildContext context, Map<String, dynamic> memo) {
                 Text("작성자: ${memo['nickname']}"),
                 Text("좋아요: ${memo['likeCnt']}  싫어요: ${memo['hateCnt']}"),
                 const SizedBox(height: 10),
-                if (memo['profileImage'] != null) // 프로필 이미지 표시
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(memo['profileImage']),
-                      radius: 20,
-                    ),
-                  ),
+                memo['profileImage'] != null
+                    ? CircleAvatar(
+                        backgroundImage: NetworkImage(memo['profileImage']),
+                        radius: 25,
+                      )
+                    : CircleAvatar(
+                        backgroundColor: Colors.grey,
+                        radius: 25,
+                        child: memo['title'] != null
+                            ? Text(
+                                memo['nickname'][0],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 40,
+                              ), // 로그인 안 된 경우 기본 아이콘
+                      ),
                 const Spacer(),
                 Align(
                   alignment: Alignment.bottomRight,

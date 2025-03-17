@@ -66,6 +66,7 @@ class _MapScreenState extends State<MapScreen> {
 
     // 마커를 가져오는 요청을 보냄
     Set<Marker> newMarkers = await MarkerService.fetchMarkers(center, (memo) {
+      print('마커 호출');
       showMarkerDetail(context, memo); // ✅ 마커 클릭 시 상세보기 호출
     });
 
