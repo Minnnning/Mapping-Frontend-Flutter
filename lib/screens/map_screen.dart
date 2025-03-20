@@ -26,7 +26,6 @@ class _MapScreenState extends State<MapScreen> {
     _fetchCurrentLocation();
   }
 
-  // 현 위치로 이동 버튼 함수
   Future<void> _fetchCurrentLocation() async {
     LatLng? position = await LocationService.getCurrentPosition();
     if (position != null) {
@@ -49,7 +48,6 @@ class _MapScreenState extends State<MapScreen> {
           2,
     );
 
-    // 마지막으로 요청한 위치와 현재 위치의 거리를 계산
     if (_lastFetchedLocation != null) {
       double distanceInMeters = await Geolocator.distanceBetween(
         _lastFetchedLocation!.latitude,
@@ -58,24 +56,18 @@ class _MapScreenState extends State<MapScreen> {
         center.longitude,
       );
 
-      // 2km(2000m) 이상 차이가 나면 새로 요청
       if (distanceInMeters < 2000) {
-        print('2km이하');
-        return; // 2km 미만이면 요청하지 않음
+        debugPrint('2km 이내, 새 요청 안 함');
+        return;
       }
     }
 
-    // 마커를 가져오는 요청을 보냄
     Set<Marker> newMarkers = await MarkerService.fetchMarkers(center, (memo) {
-      print('마커 호출');
-      showMarkerDetail(context, memo); // ✅ 마커 클릭 시 상세보기 호출
+      debugPrint('마커 클릭');
+      showMarkerDetail(context, memo);
     });
 
-    setState(() {
-      _lastFetchedLocation = center; // 마지막으로 요청한 위치 저장
-    });
-
-    // Provider에 저장
+    _lastFetchedLocation = center;
     Provider.of<MarkerProvider>(context, listen: false).setMarkers(newMarkers);
   }
 
@@ -87,20 +79,26 @@ class _MapScreenState extends State<MapScreen> {
           GoogleMap(
             onMapCreated: (controller) {
               _controller = controller;
-              _fetchMarkers();
+              if (_controller != null) {
+                _fetchMarkers();
+              }
             },
-            onCameraIdle: _fetchMarkers,
+            onCameraIdle: () {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _fetchMarkers();
+              });
+            },
             initialCameraPosition:
                 CameraPosition(target: _currentLocation, zoom: 16),
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
-            markers: Provider.of<MarkerProvider>(context)
-                .markers, // Provider에서 가져온 마커 사용
+            markers: Provider.of<MarkerProvider>(context).markers,
           ),
           Positioned(
             top: 120,
             right: 5,
             child: FloatingActionButton(
+              heroTag: 'locationButton',
               backgroundColor: Colors.white,
               mini: true,
               onPressed: _fetchCurrentLocation,

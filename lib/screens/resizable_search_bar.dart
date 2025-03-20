@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './profile_button.dart';
 import './custom_search_bar.dart';
+import 'category_bar.dart';
 
 class ResizableSearchBar extends StatelessWidget {
   const ResizableSearchBar({Key? key}) : super(key: key);
@@ -47,8 +48,8 @@ class ResizableSearchBar extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              const Center(child: Text('추가 내용이 여기에 표시됩니다.')),
+              // const SizedBox(height: 10),
+              CategoryBar(),
             ],
           ),
         );
