@@ -5,6 +5,8 @@ import '../services/marker_service.dart';
 import 'detail_memo/marker_detail.dart';
 import 'resizable_search_bar.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
+import '../providers/marker_provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -16,7 +18,6 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _controller;
   LatLng _currentLocation = const LatLng(36.629014, 127.456622);
-  Set<Marker> _markers = {};
   LatLng? _lastFetchedLocation;
 
   @override
@@ -71,9 +72,11 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     setState(() {
-      _markers = newMarkers;
       _lastFetchedLocation = center; // 마지막으로 요청한 위치 저장
     });
+
+    // Provider에 저장
+    Provider.of<MarkerProvider>(context, listen: false).setMarkers(newMarkers);
   }
 
   @override
@@ -91,7 +94,8 @@ class _MapScreenState extends State<MapScreen> {
                 CameraPosition(target: _currentLocation, zoom: 16),
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
-            markers: _markers,
+            markers: Provider.of<MarkerProvider>(context)
+                .markers, // Provider에서 가져온 마커 사용
           ),
           Positioned(
             top: 120,

@@ -10,7 +10,7 @@ class ResizableSearchBar extends StatelessWidget {
     return DraggableScrollableSheet(
       initialChildSize: 0.15, // 처음 크기 (15%)
       minChildSize: 0.15, // 최소 크기 (15%)
-      maxChildSize: 0.85, // 최대 크기 (85%)
+      maxChildSize: 0.9, // 최대 크기 (85%)
       snap: true,
       snapSizes: [0.15, 0.5, 0.85], // 15%, 50%, 85%에서 멈춤
       builder: (context, scrollController) {

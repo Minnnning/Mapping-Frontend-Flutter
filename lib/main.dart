@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'screens/map_screen.dart';
 import 'providers/user_provider.dart';
+import 'providers/marker_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => MarkerProvider()),
       ],
       child: const MyApp(),
     ),
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MapScreen(),// MapScreen을 초기 화면으로 설정
+      home: const MapScreen(), // MapScreen을 초기 화면으로 설정
     );
   }
 }
