@@ -9,10 +9,10 @@ class CategoryBar extends StatelessWidget {
   // 표시할 카테고리와 실제 카테고리를 매핑
   final Map<String, String> categoryMapping = const {
     "전체": "전체",
-    "화장실": "공용 화장실",
-    "주차장": "주차장",
     "흡연장": "흡연장",
+    "주차장": "주차장",
     "쓰레기통": "쓰레기통",
+    "화장실": "공용 화장실",
     "기타": "기타",
   };
 

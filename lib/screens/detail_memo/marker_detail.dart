@@ -4,9 +4,6 @@ import '../../services/marker_detail_service.dart'; // ✅ 서비스 파일 impo
 void showMarkerDetail(BuildContext context, Map<String, dynamic> memo) {
   showModalBottomSheet(
     context: context,
-    isScrollControlled: true, // ✅ 높이 조정 가능하게 설정
-    enableDrag: true,
-    showDragHandle: true,
     builder: (BuildContext context) {
       return FutureBuilder<Map<String, dynamic>?>(
         future: MarkerDetailService.fetchMemoDetail(memo['id']), // API 요청
