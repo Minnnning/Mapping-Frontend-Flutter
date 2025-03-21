@@ -5,9 +5,11 @@ class MarkerProvider with ChangeNotifier {
   Set<Marker> _markers = {};
   Set<Marker> _allMarkers = {}; // 원본 데이터 유지
   String _selectedCategory = "전체";
+  int _selectedMarkerId = 0; // 기본값 0
 
   Set<Marker> get markers => _markers;
   String get selectedCategory => _selectedCategory;
+  int get selectedMarkerId => _selectedMarkerId;
 
   void setMarkers(Set<Marker> markers) {
     _allMarkers = markers; // 원본 데이터 유지
@@ -29,6 +31,11 @@ class MarkerProvider with ChangeNotifier {
         return marker.infoWindow.snippet == _selectedCategory;
       }).toSet();
     }
+    notifyListeners();
+  }
+
+  void selectMarker(int markerId) {
+    _selectedMarkerId = markerId;
     notifyListeners();
   }
 }

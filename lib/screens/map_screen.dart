@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mapping_flutter/screens/detail_memo/marker_detail2.dart';
 import '../services/location_service.dart';
 import '../services/marker_service.dart';
-import 'detail_memo/marker_detail.dart';
 import 'resizable_search_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import '../providers/marker_provider.dart';
+import './detail_memo/marker_detail2.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -64,7 +65,8 @@ class _MapScreenState extends State<MapScreen> {
 
     Set<Marker> newMarkers = await MarkerService.fetchMarkers(center, (memo) {
       debugPrint('마커 클릭');
-      showMarkerDetail(context, memo);
+      Provider.of<MarkerProvider>(context, listen: false)
+          .selectMarker(memo['id']); // ✅ 선택된 마커 ID 저장
     });
 
     _lastFetchedLocation = center;
@@ -106,6 +108,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
           const ResizableSearchBar(),
+          ResizableDetailBar()
         ],
       ),
     );
