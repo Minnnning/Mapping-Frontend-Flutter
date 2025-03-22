@@ -19,10 +19,8 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
   void initState() {
     super.initState();
 
-    // DraggableScrollableController 크기 변경 감지
     _controller.addListener(() {
       if (_controller.size == 0.0) {
-        // 크기가 0이면 selectedMarkerId 초기화
         Provider.of<MarkerProvider>(context, listen: false).selectMarker(0);
       }
     });
@@ -50,6 +48,27 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
     setState(() {
       memoDetail = data;
     });
+  }
+
+  void _showFullImage(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: InteractiveViewer(
+              panEnabled: true,
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.5,
+              maxScale: 3.0,
+              child: Image.network(imageUrl, fit: BoxFit.contain),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -90,21 +109,68 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          markerProvider.selectedMarkerId != 0
-                              ? "메모 ID: ${markerProvider.selectedMarkerId}"
-                              : "선택된 메모 없음",
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10),
-                        memoDetail == null
-                            ? const Center(
-                                child: CircularProgressIndicator()) // 로딩 중
-                            : Text(
-                                "내용: ${memoDetail!['content']}",
-                                style: const TextStyle(fontSize: 14),
+                        if (memoDetail == null)
+                          const Center(child: CircularProgressIndicator())
+                        else ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  memoDetail!['title'] ?? "제목 없음",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
+                            ],
+                          ),
+                          const Divider(),
+                          Text(memoDetail!['content'] ?? '내용 없음'),
+                          const SizedBox(height: 5),
+                          if (memoDetail!['images'] != null &&
+                              memoDetail!['images'].isNotEmpty)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  height: 150,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: memoDetail!['images']
+                                          .map<Widget>((imageUrl) {
+                                        return GestureDetector(
+                                          onTap: () => _showFullImage(imageUrl),
+                                          child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(right: 8),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Image.network(
+                                                imageUrl,
+                                                height: 150,
+                                                width: 150,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          const SizedBox(height: 5),
+                          // 좋아요 & 싫어요 표시
+                          Text(
+                              "좋아요: ${memoDetail!['likeCnt'] ?? 0}  싫어요: ${memoDetail!['hateCnt'] ?? 0}"),
+                        ],
                       ],
                     ),
                   ),
