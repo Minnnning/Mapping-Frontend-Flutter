@@ -1,78 +1,222 @@
 import 'package:flutter/material.dart';
-import '../../services/marker_detail_service.dart'; // ✅ 서비스 파일 import
+import 'package:provider/provider.dart';
+import '../../providers/marker_provider.dart';
+import '../../services/marker_detail_service.dart';
 
-void showMarkerDetail(BuildContext context, Map<String, dynamic> memo) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return FutureBuilder<Map<String, dynamic>?>(
-        future: MarkerDetailService.fetchMemoDetail(memo['id']), // API 요청
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SizedBox(
-              height: 300,
-              child: Center(child: CircularProgressIndicator()), // 로딩 표시
-            );
-          }
-          if (!snapshot.hasData) {
-            return const SizedBox(
-              height: 300,
-              child: Center(child: Text("데이터를 불러오지 못했습니다.")),
-            );
-          }
+class ResizableDetailBar extends StatefulWidget {
+  const ResizableDetailBar({Key? key}) : super(key: key);
 
-          final memo = snapshot.data!;
+  @override
+  _ResizableDetailBarState createState() => _ResizableDetailBarState();
+}
 
-          return Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(memo['title'],
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text("카테고리: ${memo['category']}"),
-                Text("내용: ${memo['content']}"),
-                Text("작성자: ${memo['nickname']}"),
-                Text("좋아요: ${memo['likeCnt']}  싫어요: ${memo['hateCnt']}"),
-                const SizedBox(height: 10),
-                memo['profileImage'] != null
-                    ? CircleAvatar(
-                        backgroundImage: NetworkImage(memo['profileImage']),
-                        radius: 25,
-                      )
-                    : CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        radius: 25,
-                        child: memo['title'] != null
-                            ? Text(
-                                memo['nickname'][0],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 40,
-                              ), // 로그인 안 된 경우 기본 아이콘
-                      ),
-                const Spacer(),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("닫기"),
-                  ),
-                ),
-              ],
+class _ResizableDetailBarState extends State<ResizableDetailBar> {
+  final DraggableScrollableController _controller =
+      DraggableScrollableController();
+  Map<String, dynamic>? memoDetail;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller.addListener(() {
+      if (_controller.size == 0.0) {
+        Provider.of<MarkerProvider>(context, listen: false).selectMarker(0);
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final markerProvider = Provider.of<MarkerProvider>(context, listen: false);
+
+    markerProvider.addListener(() {
+      if (markerProvider.selectedMarkerId != 0) {
+        _controller.animateTo(
+          0.4,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        _fetchMemoDetail(markerProvider.selectedMarkerId);
+      }
+    });
+  }
+
+  Future<void> _fetchMemoDetail(int memoId) async {
+    final data = await MarkerDetailService.fetchMemoDetail(memoId);
+    setState(() {
+      memoDetail = data;
+    });
+  }
+
+  void _showFullImage(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: InteractiveViewer(
+              panEnabled: true,
+              boundaryMargin: EdgeInsets.all(20),
+              minScale: 0.5,
+              maxScale: 3.0,
+              child: Image.network(imageUrl, fit: BoxFit.contain),
             ),
-          );
-        },
-      );
-    },
-  );
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MarkerProvider>(
+      builder: (context, markerProvider, child) {
+        return DraggableScrollableSheet(
+          controller: _controller,
+          initialChildSize: 0,
+          minChildSize: 0,
+          maxChildSize: 0.9,
+          snap: true,
+          snapSizes: [0, 0.4, 0.90],
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+              ),
+              child: ListView(
+                controller: scrollController,
+                padding: EdgeInsets.zero,
+                children: [
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (memoDetail == null)
+                          const Center(child: CircularProgressIndicator())
+                        else ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  memoDetail!['title'] ?? "제목 없음",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  if (memoDetail!['profileImage'] != null)
+                                    CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                          memoDetail!['profileImage']),
+                                      radius: 20,
+                                    )
+                                  else
+                                    CircleAvatar(
+                                      backgroundColor: Colors.grey,
+                                      radius: 20,
+                                      child: memoDetail!['nickname'] != null
+                                          ? Text(
+                                              memoDetail!['nickname'][0],
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            )
+                                          : const Icon(
+                                              Icons.person,
+                                              color: Colors.white,
+                                              size: 30,
+                                            ),
+                                    ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    memoDetail!['nickname'] ?? '익명',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Divider(),
+                          Text(memoDetail!['content'] ?? '내용 없음'),
+                          const SizedBox(height: 5),
+                          if (memoDetail!['images'] != null &&
+                              memoDetail!['images'].isNotEmpty)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  height: 150,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: memoDetail!['images']
+                                          .map<Widget>((imageUrl) {
+                                        return GestureDetector(
+                                          onTap: () => _showFullImage(imageUrl),
+                                          child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(right: 8),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Image.network(
+                                                imageUrl,
+                                                height: 150,
+                                                width: 150,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          const SizedBox(height: 5),
+                          // 좋아요 & 싫어요 표시
+                          Text(
+                              "좋아요: ${memoDetail!['likeCnt'] ?? 0}  싫어요: ${memoDetail!['hateCnt'] ?? 0}"),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
