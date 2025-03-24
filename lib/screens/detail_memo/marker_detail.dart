@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/marker_provider.dart';
 import '../../services/marker_detail_service.dart';
+import 'comment_screen.dart';
 
 class ResizableDetailBar extends StatefulWidget {
   const ResizableDetailBar({Key? key}) : super(key: key);
@@ -207,6 +208,10 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                           // 좋아요 & 싫어요 표시
                           Text(
                               "좋아요: ${memoDetail!['likeCnt'] ?? 0}  싫어요: ${memoDetail!['hateCnt'] ?? 0}"),
+                          const Divider(),
+                          CommentView(
+                              key: ValueKey(markerProvider.selectedMarkerId),
+                              memoId: markerProvider.selectedMarkerId)
                         ],
                       ],
                     ),
