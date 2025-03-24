@@ -13,7 +13,7 @@ class ResizableSearchBar extends StatelessWidget {
       minChildSize: 0.15, // 최소 크기 (15%)
       maxChildSize: 0.9, // 최대 크기 (90%)
       snap: true,
-      snapSizes: [0.15, 0.5, 0.90], // 15%, 50%, 90%에서 멈춤
+      snapSizes: [0.15, 0.4, 0.90], // 15%, 40%, 90%에서 멈춤
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
