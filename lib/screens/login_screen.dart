@@ -4,6 +4,9 @@ import '../theme/colors.dart';
 import '../services/auth_service.dart';
 import '../providers/user_provider.dart';
 import '../models/user_model.dart';
+import 'activity_memo/commented_memo_screen.dart';
+import 'activity_memo/liked_memo_screen.dart';
+import 'activity_memo/my_memos_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -182,7 +185,10 @@ class LoginScreen extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           TextButton(
-            onPressed: () => print('📝 내 메모 클릭됨'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyMemoScreen()),
+            ),
             style: TextButton.styleFrom(
               alignment: Alignment.centerLeft,
               foregroundColor: Colors.black,
@@ -191,7 +197,10 @@ class LoginScreen extends StatelessWidget {
           ),
           const Divider(height: 1, thickness: 1),
           TextButton(
-            onPressed: () => print('👍 좋아요 누른 메모 클릭됨'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LikedMemoScreen()),
+            ),
             style: TextButton.styleFrom(
               alignment: Alignment.centerLeft,
               foregroundColor: Colors.black,
@@ -200,7 +209,10 @@ class LoginScreen extends StatelessWidget {
           ),
           const Divider(height: 1, thickness: 1),
           TextButton(
-            onPressed: () => print('💬 댓글 단 메모 클릭됨'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CommentedMemoScreen()),
+            ),
             style: TextButton.styleFrom(
               alignment: Alignment.centerLeft,
               foregroundColor: Colors.black,
