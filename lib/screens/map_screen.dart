@@ -3,10 +3,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mapping_flutter/screens/detail_memo/marker_detail.dart';
 import '../services/location_service.dart';
 import '../services/marker_service.dart';
+import '../services/auth_service.dart';
 import 'resizable_search_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import '../providers/marker_provider.dart';
+import '../providers/user_provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({Key? key}) : super(key: key);
@@ -19,11 +22,28 @@ class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _controller;
   LatLng _currentLocation = const LatLng(36.629014, 127.456622);
   LatLng? _lastFetchedLocation;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
-    _fetchCurrentLocation();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _checkAndFetchUser();
+    await _fetchCurrentLocation();
+  }
+
+  Future<void> _checkAndFetchUser() async {
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+    if (accessToken != null) {
+      debugPrint('액세스 토큰 존재, 유저 정보 가져오기 실행');
+      await AuthService()
+          .fetchUser(Provider.of<UserProvider>(context, listen: false));
+    } else {
+      debugPrint('액세스 토큰 없음, 유저 정보 가져오기 건너뜀');
+    }
   }
 
   Future<void> _fetchCurrentLocation() async {
