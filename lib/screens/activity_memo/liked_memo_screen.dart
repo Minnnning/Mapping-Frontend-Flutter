@@ -4,6 +4,7 @@ import '../../models/memo_list_model.dart';
 import '../../services/memo_list_service.dart';
 import '../../services/auth_service.dart';
 import '../../providers/user_provider.dart';
+import 'memo_detail_screen.dart';
 
 class LikedMemoScreen extends StatefulWidget {
   @override
@@ -85,6 +86,15 @@ class _LikedMemoScreenState extends State<LikedMemoScreen> {
                         ),
                     ],
                   ),
+                  onTap: () {
+                    // MemoDetailScreen으로 이동하면서 memo.id 전달
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MemoDetailScreen(memoId: memo.id),
+                      ),
+                    );
+                  },
                 ),
               );
             },

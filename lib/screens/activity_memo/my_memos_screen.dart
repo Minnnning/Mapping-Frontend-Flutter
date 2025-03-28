@@ -4,6 +4,7 @@ import '../../models/memo_list_model.dart';
 import '../../services/memo_list_service.dart';
 import '../../services/auth_service.dart';
 import '../../providers/user_provider.dart';
+import 'memo_detail_screen.dart';
 
 class MyMemoScreen extends StatefulWidget {
   @override
@@ -17,17 +18,15 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
   @override
   void initState() {
     super.initState();
-    // 유저 정보를 가져오기 위해 AuthService의 fetchUser 호출
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     AuthService().fetchUser(userProvider).then((user) {
       if (user != null) {
-        print('유저 정보: ${user.nickname}'); // 유저 정보 출력
+        print('유저 정보: ${user.nickname}');
       } else {
         print('유저 정보 가져오기 실패');
       }
     });
 
-    // 내 메모 데이터 가져오기
     _myMemos = _memoListService.fetchMyMemos();
   }
 
@@ -58,17 +57,23 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
               return Card(
                 margin: EdgeInsets.all(8.0),
                 child: ListTile(
-                  title: Text(memo.title,
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(
+                    memo.title,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(memo.content),
                       SizedBox(height: 4),
-                      Text('카테고리: ${memo.category}',
-                          style: TextStyle(color: Colors.grey)),
-                      Text('좋아요: ${memo.likeCnt}, 싫어요: ${memo.hateCnt}',
-                          style: TextStyle(color: Colors.grey)),
+                      Text(
+                        '카테고리: ${memo.category}',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      Text(
+                        '좋아요: ${memo.likeCnt}, 싫어요: ${memo.hateCnt}',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                       if (memo.secret != null && memo.secret!)
                         Text('🔒 비공개 메모', style: TextStyle(color: Colors.red)),
                       if (memo.images.isNotEmpty)
@@ -87,6 +92,15 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
                         ),
                     ],
                   ),
+                  onTap: () {
+                    // MemoDetailScreen으로 이동하면서 memo.id 전달
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MemoDetailScreen(memoId: memo.id),
+                      ),
+                    );
+                  },
                 ),
               );
             },
