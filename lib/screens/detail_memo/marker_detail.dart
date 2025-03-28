@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/marker_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import 'comment_screen.dart';
+import 'comment_input_bar.dart';
 
 class ResizableDetailBar extends StatefulWidget {
   const ResizableDetailBar({Key? key}) : super(key: key);
@@ -72,8 +74,16 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
     );
   }
 
+  void _onCommentAdded() {
+    // 댓글이 추가되었을 때 실행할 로직 (예: UI 갱신)
+    print("새로운 댓글이 추가되었습니다.");
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final bool isLoggedIn = userProvider.user != null;
+
     return Consumer<MarkerProvider>(
       builder: (context, markerProvider, child) {
         return DraggableScrollableSheet(
@@ -211,7 +221,12 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                           const Divider(),
                           CommentView(
                               key: ValueKey(markerProvider.selectedMarkerId),
-                              memoId: markerProvider.selectedMarkerId)
+                              memoId: markerProvider.selectedMarkerId),
+                          if (isLoggedIn)
+                            CommentInputBar(
+                              memoId: markerProvider.selectedMarkerId,
+                              onCommentAdded: _onCommentAdded,
+                            ),
                         ],
                       ],
                     ),

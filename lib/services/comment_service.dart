@@ -60,4 +60,40 @@ class CommentService {
     }
     return fetchedComments;
   }
+
+  /// 🔹 새로운 댓글 생성
+  static Future<bool> createComment({
+    required String comment,
+    required int memoId,
+    int rating = 0,
+  }) async {
+    final url = Uri.parse(
+      "https://api.mapping.kro.kr/api/v2/comment/new"
+      "?comment=${Uri.encodeComponent(comment)}"
+      "&memoId=$memoId"
+      "&rating=$rating",
+    );
+
+    String? token = await _getAccessToken();
+
+    Map<String, String> headers = {
+      'accept': '*/*',
+    };
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
+    final response = await http.post(
+      url,
+      headers: headers,
+    );
+
+    if (response.statusCode == 201) {
+      final responseData = jsonDecode(response.body);
+      return responseData['success'] ?? false;
+    } else {
+      print("❌ 댓글 생성 실패: ${response.statusCode}, 응답: ${response.body}");
+      return false;
+    }
+  }
 }
