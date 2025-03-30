@@ -222,7 +222,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                           CommentView(
                               key: ValueKey(markerProvider.selectedMarkerId),
                               memoId: markerProvider.selectedMarkerId),
-                          if (isLoggedIn)
+                          if (_controller.size == 0.9 &&isLoggedIn)
                             CommentInputBar(
                               memoId: markerProvider.selectedMarkerId,
                               onCommentAdded: _onCommentAdded,

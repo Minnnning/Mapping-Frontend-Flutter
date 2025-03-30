@@ -48,7 +48,7 @@ class ResizableSearchBar extends StatelessWidget {
                   ],
                 ),
               ),
-              // const SizedBox(height: 10),
+               const SizedBox(height: 3),
               CategoryBar(),
             ],
           ),

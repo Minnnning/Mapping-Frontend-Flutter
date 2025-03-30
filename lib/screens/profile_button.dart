@@ -18,7 +18,8 @@ class ProfileButton extends StatelessWidget {
         return TextButton(
           style: TextButton.styleFrom(
             padding: EdgeInsets.zero,
-            minimumSize: Size.zero,
+            minimumSize: Size.zero, // 최소 크기 제거
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap, // 터치 영역 최소화
           ),
           onPressed: () {
             Navigator.push(
@@ -56,6 +57,7 @@ class ProfileButton extends StatelessWidget {
                     ),
                   ),
                 ),
+                
         );
       },
     );
