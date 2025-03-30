@@ -101,3 +101,7 @@ Temporary Items
 # End of https://www.toptal.com/developers/gitignore/api/flutter,macos
 
 .env
+
+#flutter version 3.29 이후
+*.cxx
+app/.cxx/*
