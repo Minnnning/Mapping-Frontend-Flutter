@@ -46,7 +46,7 @@ class CategoryBar extends StatelessWidget {
               if (index == 0) {
                 if (isLoggedIn) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 4), // 원하는 세로 패딩 설정
+                    padding: const EdgeInsets.symmetric(vertical: 6), // 원하는 세로 패딩 설정
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
