@@ -4,7 +4,6 @@ import 'package:geolocator/geolocator.dart';
 import 'memo_input_screen_2.dart';
 import '../../theme/colors.dart';
 
-
 class MemoInputScreen1 extends StatefulWidget {
   const MemoInputScreen1({Key? key}) : super(key: key);
 
@@ -44,7 +43,8 @@ class _MemoInputScreen1State extends State<MemoInputScreen1> {
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
       _currentLocation = LatLng(position.latitude, position.longitude);
     });
@@ -77,8 +77,10 @@ class _MemoInputScreen1State extends State<MemoInputScreen1> {
         context,
         MaterialPageRoute(
           builder: (context) => MemoInputScreen2(
-            latitude: _selectedLocation!.latitude,
-            longitude: _selectedLocation!.longitude,
+            markerLatitude: _selectedLocation!.latitude,
+            markerLongitude: _selectedLocation!.longitude,
+            currentLatitude: _currentLocation.latitude,
+            currentLongitude: _currentLocation.longitude,
           ),
         ),
       );
@@ -96,14 +98,17 @@ class _MemoInputScreen1State extends State<MemoInputScreen1> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _selectedLocation != null ? _goToNextScreen : null,
-            color: _selectedLocation != null ? mainColor : Colors.grey, // ✅ 활성화되면 mainColor, 비활성화되면 회색
+            color: _selectedLocation != null
+                ? mainColor
+                : Colors.grey, // ✅ 활성화되면 mainColor, 비활성화되면 회색
           ),
         ],
       ),
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: CameraPosition(target: _currentLocation, zoom: 16),
+            initialCameraPosition:
+                CameraPosition(target: _currentLocation, zoom: 16),
             onMapCreated: (controller) {
               _mapController = controller;
               _fetchCurrentLocation();
@@ -125,7 +130,10 @@ class _MemoInputScreen1State extends State<MemoInputScreen1> {
               ),
               child: const Text(
                 "지도를 꾹 눌러서 마커 추가",
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
             ),

@@ -18,7 +18,7 @@ class AuthService {
         token = await UserApi.instance.loginWithKakaoAccount();
       }
 
-      print('카카오 로그인 성공: ${token.accessToken}');
+      print('카카오 로그인 성공 카카오 토큰: ${token.accessToken}');
 
       final response = await _dio.post(
         'https://api.mapping.kro.kr/api/v2/member/login',
@@ -34,7 +34,7 @@ class AuthService {
 
         await _secureStorage.write(key: 'accessToken', value: newAccessToken);
         await _secureStorage.write(key: 'refreshToken', value: refreshToken);
-
+        print('엑세스 토큰: ${newAccessToken}');
         UserModel user = UserModel.fromJson(data);
         userProvider.setUser(user); // ✅ 유저 정보 저장
         // try {
