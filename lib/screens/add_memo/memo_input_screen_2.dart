@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../services/memo_input_service.dart'; // 새로 생성한 서비스 파일 임포트
+import '../../services/memo_input_service.dart';
+import '../../theme/colors.dart';
 
 class MemoInputScreen2 extends StatefulWidget {
   final double markerLatitude;
@@ -26,25 +27,38 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
 
-  String _selectedCategory = '기타'; // 기본값: 기타
-  bool _secret = false; // 기본값: 공개 (false)
-  File? _selectedImage;
+  String _selectedCategory = '기타';
+  bool _secret = false;
+  List<File> _selectedImages = [];
   bool _isSubmitting = false;
+  bool _isFormValid = false;
 
   final ImagePicker _picker = ImagePicker();
 
-  // 이미지 선택 함수 (갤러리에서 선택)
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(_validateForm);
+    _contentController.addListener(_validateForm);
+  }
+
+  void _validateForm() {
+    final isValid = _titleController.text.trim().isNotEmpty &&
+        _contentController.text.trim().isNotEmpty;
+    setState(() {
+      _isFormValid = isValid;
+    });
+  }
+
   Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+    final List<XFile>? pickedFiles = await _picker.pickMultiImage();
+    if (pickedFiles != null && pickedFiles.isNotEmpty) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImages = pickedFiles.map((xfile) => File(xfile.path)).toList();
       });
     }
   }
 
-  // 폼 전송 함수 (서비스 호출)
   Future<void> _submitMemo() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -61,18 +75,16 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
       secret: _secret,
       currentLat: widget.currentLatitude,
       currentLng: widget.currentLongitude,
-      image: _selectedImage,
+      imageFiles: _selectedImages,
     );
 
     if (response != null) {
       if (response.statusCode == 201) {
-        // 성공 시 처리
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("메모가 성공적으로 생성되었습니다.")),
         );
         Navigator.pop(context);
       } else {
-        // 실패 시 처리
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("생성 실패: ${response.statusCode}")),
         );
@@ -102,7 +114,31 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("메모 작성하기"),
+        backgroundColor: Colors.white, // ✅ 앱바 배경색을 흰색으로 설정
+        actions: [
+          TextButton(
+            onPressed: (_isFormValid && !_isSubmitting) ? _submitMemo : null,
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.resolveWith<Color>(
+                (Set<WidgetState> states) {
+                  if (states.contains(WidgetState.disabled)) {
+                    return Colors.grey; // 비활성화 시 회색
+                  }
+                  return mainColor; // 활성화 시
+                },
+              ),
+            ),
+            child: _isSubmitting
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text("저장"),
+          ),
+        ],
       ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -110,18 +146,17 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
             key: _formKey,
             child: Column(
               children: [
-                // 제목 입력
                 TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(
                     labelText: "제목",
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "제목을 입력해주세요." : null,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? "제목을 입력해주세요."
+                      : null,
                 ),
                 const SizedBox(height: 16),
-                // 내용 입력
                 TextFormField(
                   controller: _contentController,
                   decoration: const InputDecoration(
@@ -129,11 +164,11 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 5,
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "내용을 입력해주세요." : null,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? "내용을 입력해주세요."
+                      : null,
                 ),
                 const SizedBox(height: 16),
-                // 카테고리 선택 (드롭다운)
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   decoration: const InputDecoration(
@@ -141,22 +176,11 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(
-                      value: "공용 화장실",
-                      child: Text("공용 화장실"),
-                    ),
-                    DropdownMenuItem(
-                      value: "주차장",
-                      child: Text("주차장"),
-                    ),
-                    DropdownMenuItem(
-                      value: "쓰레기통",
-                      child: Text("쓰레기통"),
-                    ),
-                    DropdownMenuItem(
-                      value: "기타",
-                      child: Text("기타"),
-                    ),
+                    DropdownMenuItem(value: "공용 화장실", child: Text("공용 화장실")),
+                    DropdownMenuItem(value: "주차장", child: Text("주차장")),
+                    DropdownMenuItem(value: "쓰레기통", child: Text("쓰레기통")),
+                    DropdownMenuItem(value: "흡연장", child: Text("흡연장")),
+                    DropdownMenuItem(value: "기타", child: Text("기타")),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -167,11 +191,10 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
                   },
                 ),
                 const SizedBox(height: 16),
-                // 비공개 스위치
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("비공개"),
+                    const Text("프라이빗 설정"),
                     Switch(
                       value: _secret,
                       onChanged: (value) {
@@ -179,37 +202,28 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
                           _secret = value;
                         });
                       },
+                      //activeColor: mainColor, // 스위치 내부 색상
+                      activeTrackColor: mainColor, // 스위치 트랙 색상
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                // 이미지 선택 및 미리보기
-                if (_selectedImage != null)
-                  Column(
-                    children: [
-                      Image.file(
-                        _selectedImage!,
-                        height: 150,
-                      ),
-                      const SizedBox(height: 8),
-                    ],
+                if (_selectedImages.isNotEmpty)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _selectedImages.map((file) {
+                      return Image.file(file,
+                          width: 100, height: 100, fit: BoxFit.cover);
+                    }).toList(),
                   ),
                 ElevatedButton.icon(
                   onPressed: _pickImage,
-                  icon: const Icon(Icons.image),
+                  icon: const Icon(Icons.image, color: Colors.white),
                   label: const Text("이미지 선택 (선택사항)"),
-                ),
-                const SizedBox(height: 24),
-                // 전송 버튼
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitMemo,
-                    child: _isSubmitting
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
-                          )
-                        : const Text("메모 전송"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainColor, // 버튼 배경색
+                    foregroundColor: Colors.white, // 아이콘과 텍스트 색
                   ),
                 ),
               ],

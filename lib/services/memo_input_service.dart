@@ -22,7 +22,7 @@ class MemoInputService {
     required bool secret,
     required double currentLat,
     required double currentLng,
-    File? image,
+    required List<File> imageFiles, // 변경된 부분
   }) async {
     final uri = Uri.parse("https://api.mapping.kro.kr/api/v2/memo/new");
     final token = await _getAccessToken();
@@ -39,13 +39,15 @@ class MemoInputService {
     request.fields['currentLat'] = currentLat.toString();
     request.fields['currentLng'] = currentLng.toString();
 
-    // 이미지 파일 추가 (선택 사항)
-    if (image != null) {
-      request.files.add(await http.MultipartFile.fromPath(
-        'images',
+    // 여러 이미지 파일 추가 (없으면 아무것도 안 함)
+    for (int i = 0; i < imageFiles.length; i++) {
+      final image = imageFiles[i];
+      final multipartFile = await http.MultipartFile.fromPath(
+        'images', // 서버에서 같은 이름으로 여러 파일 받는 구조여야 함
         image.path,
         contentType: MediaType('image', 'png'),
-      ));
+      );
+      request.files.add(multipartFile);
     }
 
     // 헤더 추가
