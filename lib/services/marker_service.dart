@@ -7,53 +7,60 @@ class MarkerService {
   static final FlutterSecureStorage _secureStorage =
       const FlutterSecureStorage();
 
-  /// 엑세스 토큰을 가져오는 함수
   static Future<String?> _getAccessToken() async {
     return await _secureStorage.read(key: 'accessToken');
   }
 
-  static Future<Set<Marker>> fetchMarkers(
-      LatLng center, Function(Map<String, dynamic>) onTap) async {
+  static Future<Map<String, dynamic>> fetchMarkers(
+    LatLng center,
+    Function(Map<String, dynamic>) onTap,
+  ) async {
     final String url =
         'https://api.mapping.kro.kr/api/v2/memo/total?lat=${center.latitude}&lng=${center.longitude}&km=5';
 
     try {
-      // 🔥 토큰 가져오기
       String? token = await _getAccessToken();
-
-      // 기본 헤더 설정
       Map<String, String> headers = {'accept': '*/*'};
-
-      // 토큰이 있다면 Authorization 헤더 추가
-      if (token != null) {
-        headers['Authorization'] = 'Bearer $token';
-      } else {
-        print("⚠️ 엑세스 토큰 없음. 토큰 없이 요청을 보냅니다.");
-      }
+      if (token != null) headers['Authorization'] = 'Bearer $token';
 
       final response = await http.get(Uri.parse(url), headers: headers);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data =
             json.decode(utf8.decode(response.bodyBytes));
-        print('memo 요청');
         if (data['success'] == true) {
-          return data['data'].map<Marker>((memo) {
+          List memos = data['data'];
+          Map<String, bool> secretMap = {};
+
+          final markers = memos.map<Marker>((memo) {
+            secretMap[memo['id'].toString()] = memo['secret'] == true;
+
             return Marker(
               markerId: MarkerId(memo['id'].toString()),
               position: LatLng(memo['lat'], memo['lng']),
-              infoWindow:
-                  InfoWindow(title: memo['title'], snippet: memo['category']),
+              infoWindow: InfoWindow(
+                title: memo['title'],
+                snippet: memo['category'],
+              ),
               icon: _getCategoryIcon(memo['category']),
-              onTap: () => onTap(memo), // ✅ 마커 클릭 시 상세보기 호출
+              onTap: () => onTap(memo),
             );
           }).toSet();
+
+          return {
+            'markers': markers,
+            'secretMap': secretMap,
+          };
         }
       }
     } catch (e) {
       print("API 요청 오류: $e");
     }
-    return {};
+
+    return {
+      'markers': <Marker>{},
+      'secretMap': <String, bool>{},
+    };
   }
 
   static BitmapDescriptor _getCategoryIcon(String category) {

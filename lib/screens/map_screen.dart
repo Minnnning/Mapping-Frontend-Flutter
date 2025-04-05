@@ -82,14 +82,18 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
 
-    Set<Marker> newMarkers = await MarkerService.fetchMarkers(center, (memo) {
+    final result = await MarkerService.fetchMarkers(center, (memo) {
       debugPrint('마커 클릭');
       Provider.of<MarkerProvider>(context, listen: false)
-          .selectMarker(memo['id']); // ✅ 선택된 마커 ID 저장
+          .selectMarker(memo['id']);
     });
 
+    final Set<Marker> newMarkers = result['markers'];
+    final Map<String, bool> secretMap = result['secretMap'];
+
     _lastFetchedLocation = center;
-    Provider.of<MarkerProvider>(context, listen: false).setMarkers(newMarkers);
+    Provider.of<MarkerProvider>(context, listen: false)
+        .setMarkers(newMarkers, secretMap);
   }
 
   @override
