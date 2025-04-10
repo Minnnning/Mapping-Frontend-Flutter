@@ -51,14 +51,19 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("메모 상세")),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: memoDetail == null
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
+      appBar: AppBar(
+        title: const Text("메모 상세"),
+        backgroundColor: Colors.white,
+      ),
+      backgroundColor: Colors.white,
+      body: memoDetail == null
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 제목과 유저 정보
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -149,7 +154,6 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                       ],
                     ),
                   const SizedBox(height: 5),
-                  // 좋아요 & 싫어요 표시
                   Text(
                     "좋아요: ${memoDetail!['likeCnt'] ?? 0}  싫어요: ${memoDetail!['hateCnt'] ?? 0}",
                   ),
@@ -160,7 +164,7 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                   ),
                 ],
               ),
-      ),
+            ),
     );
   }
 }

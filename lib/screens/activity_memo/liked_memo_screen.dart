@@ -4,6 +4,7 @@ import '../../models/memo_list_model.dart';
 import '../../services/memo_list_service.dart';
 import '../../services/auth_service.dart';
 import '../../providers/user_provider.dart';
+import '../../theme/colors.dart';
 import 'memo_detail_screen.dart';
 
 class LikedMemoScreen extends StatefulWidget {
@@ -36,8 +37,10 @@ class _LikedMemoScreenState extends State<LikedMemoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('내 메모'),
+        title: Text('좋아요 누른 메모'),
+        backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: FutureBuilder<List<MemoList>>(
         future: _memos,
         builder: (context, snapshot) {
@@ -57,6 +60,7 @@ class _LikedMemoScreenState extends State<LikedMemoScreen> {
               MemoList memo = memos[index];
 
               return Card(
+                color: boxGray,
                 margin: EdgeInsets.all(8.0),
                 child: ListTile(
                   title: Text(memo.title,

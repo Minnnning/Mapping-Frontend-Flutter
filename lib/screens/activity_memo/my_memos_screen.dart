@@ -4,6 +4,7 @@ import '../../models/memo_list_model.dart';
 import '../../services/memo_list_service.dart';
 import '../../services/auth_service.dart';
 import '../../providers/user_provider.dart';
+import '../../theme/colors.dart';
 import 'memo_detail_screen.dart';
 
 class MyMemoScreen extends StatefulWidget {
@@ -35,7 +36,9 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('내 메모'),
+        backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: FutureBuilder<List<MemoList>>(
         future: _myMemos,
         builder: (context, snapshot) {
@@ -55,6 +58,7 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
               MemoList memo = memos[index];
 
               return Card(
+                color: boxGray,
                 margin: EdgeInsets.all(8.0),
                 child: ListTile(
                   title: Text(
