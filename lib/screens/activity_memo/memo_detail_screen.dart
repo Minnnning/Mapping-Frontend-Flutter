@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/marker_detail_service.dart';
 import '../detail_memo/comment_screen.dart';
+import '../../services/like_service.dart';
 
 class MemoDetailScreen extends StatefulWidget {
   final int memoId;
