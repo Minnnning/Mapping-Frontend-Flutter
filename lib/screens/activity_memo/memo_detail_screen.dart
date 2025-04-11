@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../detail_memo/comment_screen.dart';
 import '../../services/like_service.dart';
@@ -51,6 +53,8 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final bool isLoggedIn = userProvider.user != null;
     return Scaffold(
       appBar: AppBar(
         title: const Text("메모 상세"),
@@ -154,9 +158,61 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                         ),
                       ],
                     ),
-                  const SizedBox(height: 5),
-                  Text(
-                    "좋아요: ${memoDetail!['likeCnt'] ?? 0}  싫어요: ${memoDetail!['hateCnt'] ?? 0}",
+                  // 좋아요 & 싫어요 표시
+                  Row(
+                    children: [
+                      IconButton(
+                        visualDensity: VisualDensity.compact, // 여백 축소
+                        //padding: EdgeInsets.zero, // 내부 여백
+                        onPressed: isLoggedIn
+                            ? () async {
+                                final success =
+                                    await LikeService.likeMemo(widget.memoId);
+                                if (success) {
+                                  _fetchMemoDetail(widget.memoId);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('좋아요!')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('좋아요 실패')),
+                                  );
+                                }
+                              }
+                            : null, // 로그인 안 되어 있으면 비활성화
+                        icon: Icon(
+                          Icons.thumb_up,
+                          color: isLoggedIn ? Colors.yellow : Colors.grey,
+                        ),
+                      ),
+                      Text('${memoDetail!['likeCnt'] ?? 0}'),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        visualDensity: VisualDensity.compact, // 여백 축소
+                        //padding: EdgeInsets.zero, // 내부 여백
+                        onPressed: isLoggedIn
+                            ? () async {
+                                final success =
+                                    await LikeService.hateMemo(widget.memoId);
+                                if (success) {
+                                  _fetchMemoDetail(widget.memoId);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('싫어요')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('싫어요 실패')),
+                                  );
+                                }
+                              }
+                            : null,
+                        icon: Icon(
+                          Icons.thumb_down,
+                          color: isLoggedIn ? Colors.yellow : Colors.grey,
+                        ),
+                      ),
+                      Text('${memoDetail!['hateCnt'] ?? 0}'),
+                    ],
                   ),
                   const Divider(),
                   CommentView(
