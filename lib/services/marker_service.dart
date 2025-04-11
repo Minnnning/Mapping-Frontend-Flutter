@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -31,21 +32,24 @@ class MarkerService {
         if (data['success'] == true) {
           List memos = data['data'];
           Map<String, bool> secretMap = {};
+          Set<Marker> markers = {};
 
-          final markers = memos.map<Marker>((memo) {
+          for (var memo in memos) {
             secretMap[memo['id'].toString()] = memo['secret'] == true;
 
-            return Marker(
+            final icon = await _getCategoryIcon(memo['category']);
+
+            markers.add(Marker(
               markerId: MarkerId(memo['id'].toString()),
               position: LatLng(memo['lat'], memo['lng']),
               infoWindow: InfoWindow(
                 title: memo['title'],
                 snippet: memo['category'],
               ),
-              icon: _getCategoryIcon(memo['category']),
+              icon: icon,
               onTap: () => onTap(memo),
-            );
-          }).toSet();
+            ));
+          }
 
           return {
             'markers': markers,
@@ -63,20 +67,23 @@ class MarkerService {
     };
   }
 
-  static BitmapDescriptor _getCategoryIcon(String category) {
+  static Future<BitmapDescriptor> _getCategoryIcon(String category) async {
     switch (category) {
       case '공용 화장실':
-        return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+        return await BitmapDescriptor.asset(
+            ImageConfiguration(), 'assets/icons/wc_icon.png');
       case '쓰레기통':
-        return BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueMagenta);
+        return await BitmapDescriptor.asset(
+            ImageConfiguration(), 'assets/icons/trash_icon.png');
       case '흡연장':
-        return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+        return await BitmapDescriptor.asset(
+            ImageConfiguration(), 'assets/icons/smoking_icon.png');
       case '주차장':
-        return BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueOrange);
+        return await BitmapDescriptor.asset(
+            ImageConfiguration(), 'assets/icons/parking_icon.png');
       default:
-        return BitmapDescriptor.defaultMarker;
+        return await BitmapDescriptor.asset(
+            ImageConfiguration(), 'assets/icons/marker.png');
     }
   }
 }

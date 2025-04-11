@@ -67,3 +67,4 @@ flutter:
     - .env
     - assets/images/kakao_login_medium_wide.png
     - assets/images/kakao_login_large_wide.png
+    - assets/icons/

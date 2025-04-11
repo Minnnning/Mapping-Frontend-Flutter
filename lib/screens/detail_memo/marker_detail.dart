@@ -4,7 +4,6 @@ import '../../providers/marker_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../../services/like_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'comment_screen.dart';
 
 class ResizableDetailBar extends StatefulWidget {
@@ -215,6 +214,8 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                           Row(
                             children: [
                               IconButton(
+                                visualDensity: VisualDensity.compact, // 여백 축소
+                                //padding: EdgeInsets.zero, // 내부 여백
                                 onPressed: isLoggedIn
                                     ? () async {
                                         final success =
@@ -247,6 +248,8 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                               Text('${memoDetail!['likeCnt'] ?? 0}'),
                               const SizedBox(width: 8),
                               IconButton(
+                                visualDensity: VisualDensity.compact, // 여백 축소
+                                //padding: EdgeInsets.zero, // 내부 여백
                                 onPressed: isLoggedIn
                                     ? () async {
                                         final success =
