@@ -7,6 +7,7 @@ import '../models/user_model.dart';
 import 'activity_memo/commented_memo_screen.dart';
 import 'activity_memo/liked_memo_screen.dart';
 import 'activity_memo/my_memos_screen.dart';
+import 'change_info_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -114,10 +115,10 @@ class LoginScreen extends StatelessWidget {
               Expanded(child: SizedBox()),
               if (user != null) // 로그인한 경우에만 프로필 변경 버튼 표시
                 TextButton(
-                  onPressed: () {
-                    print('프로필 변경 클릭됨');
-                    // TODO: 프로필 변경 기능 추가
-                  },
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ChangeInfoScreen()),
+                  ),
                   style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: mainColor // 버튼 색상 설정
