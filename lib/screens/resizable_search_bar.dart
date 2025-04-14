@@ -2,35 +2,45 @@ import 'package:flutter/material.dart';
 import './profile_button.dart';
 import './custom_search_bar.dart';
 import 'category_bar.dart';
+import 'search_result_list.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class ResizableSearchBar extends StatelessWidget {
-  const ResizableSearchBar({Key? key}) : super(key: key);
+class ResizableSearchBar extends StatefulWidget {
+  final GoogleMapController mapController;
+
+  const ResizableSearchBar({Key? key, required this.mapController})
+      : super(key: key);
+
+  @override
+  State<ResizableSearchBar> createState() => _ResizableSearchBarState();
+}
+
+class _ResizableSearchBarState extends State<ResizableSearchBar> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.15, // 처음 크기 (15%)
-      minChildSize: 0.15, // 최소 크기 (15%)
-      maxChildSize: 0.9, // 최대 크기 (90%)
+      initialChildSize: 0.15,
+      minChildSize: 0.15,
+      maxChildSize: 0.9,
       snap: true,
-      snapSizes: [0.15, 0.4, 0.90], // 15%, 40%, 90%에서 멈춤
+      snapSizes: const [0.15, 0.4, 0.90],
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
-            // 박스 UI
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
           ),
           child: ListView(
-            controller: scrollController, // 스크롤 가능하도록 설정
+            controller: scrollController,
             padding: EdgeInsets.zero,
             children: [
-              // Drag Handle 영역 추가
               Center(
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 8),
-                  width: 40, // 핸들의 가로 크기를 제한
+                  width: 40,
                   height: 4,
                   decoration: BoxDecoration(
                     color: Colors.grey[400],
@@ -42,14 +52,26 @@ class ResizableSearchBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    CustomSearchBar(),
+                    Expanded(
+                      child: CustomSearchBar(
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                        },
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    ProfileButton(),
+                    const ProfileButton(),
                   ],
                 ),
               ),
-               const SizedBox(height: 3),
-              CategoryBar(),
+              const SizedBox(height: 3),
+              const CategoryBar(),
+              SearchResultList(
+                searchQuery: _searchQuery,
+                mapController: widget.mapController,
+              ),
             ],
           ),
         );

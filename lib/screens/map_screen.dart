@@ -130,7 +130,8 @@ class _MapScreenState extends State<MapScreen> {
               child: const Icon(Icons.my_location, color: Colors.black),
             ),
           ),
-          const ResizableSearchBar(),
+          if (_controller != null)
+            ResizableSearchBar(mapController: _controller!),
           ResizableDetailBar()
         ],
       ),
