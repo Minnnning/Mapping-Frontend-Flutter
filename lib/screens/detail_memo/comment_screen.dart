@@ -3,6 +3,7 @@ import '../../services/comment_service.dart'; // 🔥 서비스 파일 임포트
 import 'package:provider/provider.dart';
 import 'comment_input_bar.dart';
 import '../../providers/user_provider.dart';
+import '../../services/like_service.dart';
 
 class CommentView extends StatefulWidget {
   final int memoId;
@@ -66,6 +67,10 @@ class _CommentViewState extends State<CommentView> {
                         itemCount: comments.length,
                         itemBuilder: (context, index) {
                           final comment = comments[index];
+                          final bool isModified = comment['modify'] == true;
+                          final bool myLike = comment['myLike'] == true;
+                          final int likeCnt = comment['likeCnt'] ?? 0;
+
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 0),
@@ -84,10 +89,57 @@ class _CommentViewState extends State<CommentView> {
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text(comment['comment'] ?? ''),
-                            trailing: Text(
-                              comment['updatedAt']?.split(' ')[0] ?? '',
-                              style: const TextStyle(fontSize: 12),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(comment['comment'] ?? ''),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Text(
+                                      (comment['updatedAt']?.split(' ')[0] ??
+                                              '') +
+                                          (isModified ? ' (수정됨)' : ''),
+                                      style: const TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
+                                    const Spacer(), // 중간 여백 대신 양쪽 끝 정렬
+                                    Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: isLoggedIn
+                                              ? () async {
+                                                  final success =
+                                                      await LikeService
+                                                          .likeComment(
+                                                              comment['id']);
+                                                  if (success) _loadComments();
+                                                }
+                                              : null,
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.favorite,
+                                                size: 16,
+                                                color: comment['myLike'] == true
+                                                    ? Colors.red
+                                                    : Colors.grey,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                comment['likeCnt'].toString(),
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           );
                         },

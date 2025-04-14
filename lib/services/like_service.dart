@@ -23,6 +23,13 @@ class LikeService {
     return await _postMemoAction(url, action: "싫어요");
   }
 
+  /// 댓글 좋아요 요청 함수
+  static Future<bool> likeComment(int commentId) async {
+    final String url =
+        'https://api.mapping.kro.kr/api/v2/comment/like/$commentId';
+    return await _postMemoAction(url, action: "댓글 좋아요");
+  }
+
   /// 공통 POST 요청 처리 함수
   static Future<bool> _postMemoAction(String url,
       {required String action}) async {
