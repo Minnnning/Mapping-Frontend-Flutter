@@ -83,7 +83,7 @@ class MarkerService {
             ImageConfiguration(), 'assets/icons/parking_icon.png');
       default:
         return await BitmapDescriptor.asset(
-            ImageConfiguration(), 'assets/icons/marker.png');
+            ImageConfiguration(), 'assets/icons/guitar_icon.png');
     }
   }
 }
