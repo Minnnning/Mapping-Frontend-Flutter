@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/comment_service.dart';
+import '../../theme/colors.dart';
 
 class CommentInputBar extends StatefulWidget {
   final int memoId;
@@ -57,20 +58,44 @@ class _CommentInputBarState extends State<CommentInputBar> {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: "댓글을 입력하세요...",
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 8),
+            child: SizedBox(
+              height: 48, // 전송 버튼과 동일한 높이 설정
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: "댓글을 입력하세요...",
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  isDense: true,
+                ),
               ),
             ),
           ),
+          const SizedBox(width: 8), // 텍스트필드와 버튼 사이 간격
           _isLoading
-              ? CircularProgressIndicator()
-              : IconButton(
-                  icon: Icon(Icons.send, color: Colors.blue),
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : ElevatedButton(
                   onPressed: _submitComment,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 13),
+                    backgroundColor: mainColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(9.0),
+                    ),
+                  ),
+                  child: const Text(
+                    "전송",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
         ],
       ),
