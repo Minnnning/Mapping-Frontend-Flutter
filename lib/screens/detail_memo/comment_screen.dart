@@ -55,7 +55,12 @@ class _CommentViewState extends State<CommentView> {
             : comments.isEmpty
                 ? Column(
                     children: [
-                      const Center(child: Text("댓글이 없습니다.")),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Center(
+                          child: Text("댓글이 없습니다."),
+                        ),
+                      ),
                     ],
                   )
                 : Column(
