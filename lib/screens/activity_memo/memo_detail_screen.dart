@@ -73,15 +73,26 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          memoDetail!['title'] ?? "제목 없음",
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                          child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start, // <-- 이것만 있으면
+                        children: [
+                          Text(
+                            memoDetail!['title'] ?? "제목 없음",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                          Text(
+                            memoDetail!['category'] ?? "카테고리",
+                            style: const TextStyle(
+                              color: Colors.grey,
+                            ),
+                          )
+                        ],
+                      )),
                       Row(
                         children: [
                           if (memoDetail!['profileImage'] != null)
@@ -212,6 +223,15 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                         ),
                       ),
                       Text('${memoDetail!['hateCnt'] ?? 0}'),
+                      const Spacer(),
+                      Text(
+                        (memoDetail!['date'] ?? "날짜")
+                            .split(':')
+                            .first, // ':' 기준으로 자르고 첫 번째 요소만 사용
+                        style: const TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
                     ],
                   ),
                   const Divider(),
