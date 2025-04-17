@@ -4,6 +4,7 @@ import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../detail_memo/comment_screen.dart';
 import '../../services/like_service.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MemoDetailScreen extends StatefulWidget {
   final int memoId;
@@ -169,6 +170,48 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                         ),
                       ],
                     ),
+                  //지도출력
+                  if (memoDetail!['lat'] != null && memoDetail!['lng'] != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        const Text(
+                          '위치',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 200,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: GoogleMap(
+                              initialCameraPosition: CameraPosition(
+                                target: LatLng(
+                                  memoDetail!['lat'],
+                                  memoDetail!['lng'],
+                                ),
+                                zoom: 18,
+                              ),
+                              markers: {
+                                Marker(
+                                  markerId: const MarkerId('memo_location'),
+                                  position: LatLng(
+                                    memoDetail!['lat'],
+                                    memoDetail!['lng'],
+                                  ),
+                                )
+                              },
+                              zoomControlsEnabled: false,
+                              liteModeEnabled: true, // 성능 이슈 있으면 lite 모드 사용
+                              myLocationButtonEnabled: false,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
                   // 좋아요 & 싫어요 표시
                   Row(
                     children: [
