@@ -6,11 +6,13 @@ import '../providers/marker_provider.dart';
 class SearchResultList extends StatelessWidget {
   final String searchQuery;
   final GoogleMapController mapController;
+  final DraggableScrollableController sheetController;
 
   const SearchResultList({
     Key? key,
     required this.searchQuery,
     required this.mapController,
+    required this.sheetController,
   }) : super(key: key);
 
   @override
@@ -18,7 +20,6 @@ class SearchResultList extends StatelessWidget {
     final markerProvider = Provider.of<MarkerProvider>(context);
     final allMarkers = markerProvider.markers.toList();
 
-    // 검색어가 비어 있으면 전체, 아니면 필터링
     final filteredMarkers = searchQuery.isEmpty
         ? allMarkers
         : allMarkers.where((marker) {
@@ -36,13 +37,20 @@ class SearchResultList extends StatelessWidget {
 
         return InkWell(
           onTap: () {
-            // 마커 선택 처리
+            // 마커 선택
             Provider.of<MarkerProvider>(context, listen: false)
                 .selectMarker(markerId);
 
             // 카메라 이동
             mapController.animateCamera(
               CameraUpdate.newLatLng(position),
+            );
+
+            // 드래그 시트 크기 줄이기
+            sheetController.animateTo(
+              0.4,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
             );
           },
           child: Padding(

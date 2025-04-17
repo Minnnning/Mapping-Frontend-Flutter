@@ -16,11 +16,14 @@ class ResizableSearchBar extends StatefulWidget {
 }
 
 class _ResizableSearchBarState extends State<ResizableSearchBar> {
+  final DraggableScrollableController _controller =
+      DraggableScrollableController();
   String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
+      controller: _controller, // 추가된 부분
       initialChildSize: 0.15,
       minChildSize: 0.15,
       maxChildSize: 0.9,
@@ -71,6 +74,7 @@ class _ResizableSearchBarState extends State<ResizableSearchBar> {
               SearchResultList(
                 searchQuery: _searchQuery,
                 mapController: widget.mapController,
+                sheetController: _controller, // 전달
               ),
             ],
           ),
