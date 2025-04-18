@@ -83,7 +83,9 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("메모가 성공적으로 생성되었습니다.")),
         );
-        Navigator.pop(context);
+        // 두 단계 이전 화면으로 이동
+        Navigator.pop(context); // MemoInputScreen2 pop
+        Navigator.pop(context); // MemoInputScreen1 pop
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("생성 실패: ${response.statusCode}")),
