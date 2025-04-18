@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/change_info_service.dart';
 import '../theme/colors.dart';
+import '../services/auth_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ChangeInfoScreen extends StatefulWidget {
   const ChangeInfoScreen({super.key});
@@ -13,6 +17,7 @@ class ChangeInfoScreen extends StatefulWidget {
 
 class _ChangeInfoScreenState extends State<ChangeInfoScreen> {
   final TextEditingController _nicknameController = TextEditingController();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   File? _selectedImage;
   bool _isNicknameValid = false;
 
@@ -39,8 +44,16 @@ class _ChangeInfoScreenState extends State<ChangeInfoScreen> {
     final success =
         await ChangeInfoService.updateNickname(_nicknameController.text.trim());
     if (success) {
+      debugPrint('닉네임 변경 성공 → 유저 정보 다시 가져오기 시도');
+      String? accessToken = await _secureStorage.read(key: 'accessToken');
+      if (accessToken != null) {
+        await AuthService()
+            .fetchUser(Provider.of<UserProvider>(context, listen: false));
+      }
+
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("닉네임이 변경되었습니다.")));
+      Navigator.of(context).pop(); // 뒤로 이동
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("닉네임 변경 실패")));
@@ -52,8 +65,15 @@ class _ChangeInfoScreenState extends State<ChangeInfoScreen> {
 
     final success = await ChangeInfoService.updateProfileImage(_selectedImage!);
     if (success) {
+      debugPrint('프로필 이미지 변경 성공 → 유저 정보 다시 가져오기 시도');
+      String? accessToken = await _secureStorage.read(key: 'accessToken');
+      if (accessToken != null) {
+        await AuthService()
+            .fetchUser(Provider.of<UserProvider>(context, listen: false));
+      }
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("프로필 이미지가 변경되었습니다.")));
+      Navigator.of(context).pop(); // 뒤로 이동
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("프로필 이미지 변경 실패")));
