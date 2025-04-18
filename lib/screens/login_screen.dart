@@ -8,6 +8,7 @@ import 'activity_memo/commented_memo_screen.dart';
 import 'activity_memo/liked_memo_screen.dart';
 import 'activity_memo/my_memos_screen.dart';
 import 'change_info_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -50,6 +51,7 @@ class LoginScreen extends StatelessWidget {
                   : buildUserActions(context, user),
               if (user != null) buildBlockedUsersButton(context),
               const Spacer(),
+              buildLicenseButton(context),
               const Padding(
                 padding: EdgeInsets.only(bottom: 16),
                 child: Text('문의하기 이메일: team.mapping.app@gmail.com'),
@@ -251,4 +253,39 @@ class LoginScreen extends StatelessWidget {
       ],
     );
   }
+}
+
+Widget buildLicenseButton(BuildContext context) {
+  return Column(
+    children: [
+      Container(
+        // decoration: BoxDecoration(
+        //   color: boxGray,
+        //   borderRadius: BorderRadius.circular(9),
+        // ),
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+        width: double.infinity,
+        child: TextButton(
+          onPressed: () async {
+            final info = await PackageInfo.fromPlatform();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => LicensePage(
+                  applicationName: info.appName,
+                  applicationVersion: info.version,
+                  applicationIcon: const FlutterLogo(),
+                ),
+              ),
+            );
+          },
+          style: TextButton.styleFrom(
+            alignment: Alignment.centerLeft,
+            foregroundColor: Colors.black,
+          ),
+          child: const Text('📄 오픈소스 라이선스 보기'),
+        ),
+      ),
+    ],
+  );
 }
