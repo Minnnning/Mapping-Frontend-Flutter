@@ -96,6 +96,12 @@ class _MapScreenState extends State<MapScreen> {
         .setMarkers(newMarkers, secretMap);
   }
 
+  void _forceFetchMarkers() {
+    _lastFetchedLocation = null; // 2km 거리 제한 무시
+    _fetchMarkers(); // 마커 다시 불러오기
+    debugPrint("사용자 재검색");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,6 +134,17 @@ class _MapScreenState extends State<MapScreen> {
               mini: true,
               onPressed: _fetchCurrentLocation,
               child: const Icon(Icons.my_location, color: Colors.black),
+            ),
+          ),
+          Positioned(
+            top: 170,
+            right: 5,
+            child: FloatingActionButton(
+              heroTag: 'refreshMarkersButton',
+              backgroundColor: Colors.white,
+              mini: true,
+              onPressed: _forceFetchMarkers,
+              child: const Icon(Icons.refresh, color: Colors.black),
             ),
           ),
           if (_controller != null)
