@@ -23,6 +23,7 @@ class _MapScreenState extends State<MapScreen> {
   LatLng _currentLocation = const LatLng(36.629014, 127.456622);
   LatLng? _lastFetchedLocation;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -96,9 +97,11 @@ class _MapScreenState extends State<MapScreen> {
         .setMarkers(newMarkers, secretMap);
   }
 
-  void _forceFetchMarkers() {
-    _lastFetchedLocation = null; // 2km 거리 제한 무시
-    _fetchMarkers(); // 마커 다시 불러오기
+  void _forceFetchMarkers() async {
+    setState(() => _isLoading = true); // 로딩 시작
+    _lastFetchedLocation = null;
+    await _fetchMarkers(); // 마커 다시 불러오기
+    setState(() => _isLoading = false); // 로딩 종료
     debugPrint("사용자 재검색");
   }
 
@@ -149,7 +152,21 @@ class _MapScreenState extends State<MapScreen> {
           ),
           if (_controller != null)
             ResizableSearchBar(mapController: _controller!),
-          ResizableDetailBar()
+          ResizableDetailBar(),
+          if (_isLoading)
+            Container(
+              color: Color.fromARGB(101, 255, 255, 255),
+              child: const Center(
+                child: Text(
+                  'Loading...',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
