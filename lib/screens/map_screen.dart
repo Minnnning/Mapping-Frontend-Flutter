@@ -160,9 +160,8 @@ class _MapScreenState extends State<MapScreen> {
                 child: Text(
                   'Loading...',
                   style: TextStyle(
-                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Colors.black,
                   ),
                 ),
               ),

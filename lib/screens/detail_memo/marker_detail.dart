@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mapping_flutter/theme/colors.dart';
 import 'package:provider/provider.dart';
 import '../../providers/marker_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../../services/like_service.dart';
+
+import 'memo_delete_dialog.dart';
 import 'comment_screen.dart';
 
 class ResizableDetailBar extends StatefulWidget {
@@ -123,8 +126,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                             children: [
                               Expanded(
                                   child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start, // <-- 이것만 있으면
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     memoDetail!['title'] ?? "제목 없음",
@@ -134,11 +136,28 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  Text(
-                                    memoDetail!['category'] ?? "카테고리",
-                                    style: const TextStyle(
-                                      color: Colors.grey,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        memoDetail!['category'] ?? "카테고리",
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        (memoDetail!['date'] ?? "날짜")
+                                            .split(':')
+                                            .first, // ':' 기준으로 자르고 첫 번째 요소만 사용
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      if (memoDetail!['certified'] == true)
+                                        const Icon(Icons.verified,
+                                            color: Colors.grey),
+                                    ],
                                   )
                                 ],
                               )),
@@ -292,14 +311,57 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                               ),
                               Text('${memoDetail!['hateCnt'] ?? 0}'),
                               const Spacer(),
-                              Text(
-                                (memoDetail!['date'] ?? "날짜")
-                                    .split(':')
-                                    .first, // ':' 기준으로 자르고 첫 번째 요소만 사용
-                                style: const TextStyle(
-                                  color: Colors.grey,
+                              if (isLoggedIn)
+                                PopupMenuButton(
+                                  icon: const Icon(Icons.more_horiz),
+                                  color: Colors.white,
+                                  itemBuilder: (BuildContext context) {
+                                    if (memoDetail!['myMemo'] == true) {
+                                      // myMemo가 true일 때 수정/삭제 메뉴 표시
+                                      return [
+                                        PopupMenuItem<String>(
+                                          value: 'edit',
+                                          child: Text('수정'),
+                                        ),
+                                        PopupMenuItem<String>(
+                                          value: 'delete',
+                                          child: Text('삭제'),
+                                        ),
+                                      ];
+                                    } else {
+                                      // myMemo가 false일 때 신고/차단 메뉴 표시
+                                      return [
+                                        PopupMenuItem<String>(
+                                          value: 'report',
+                                          child: Text('신고'),
+                                        ),
+                                        PopupMenuItem<String>(
+                                          value: 'block',
+                                          child: Text('차단'),
+                                        ),
+                                      ];
+                                    }
+                                  },
+                                  onSelected: (String value) {
+                                    if (value == 'edit') {
+                                      // 수정 동작
+                                      debugPrint("수정 선택됨");
+                                      // 수정 로직을 여기에 추가
+                                    } else if (value == 'delete') {
+                                      debugPrint("삭제 선택됨");
+                                      showMemoDeleteDialog(context,
+                                          markerProvider.selectedMarkerId);
+                                    } else if (value == 'report') {
+                                      // 신고 동작
+                                      debugPrint("신고 선택됨");
+                                      // 신고 로직을 여기에 추가
+                                    } else if (value == 'block') {
+                                      // 차단 동작
+                                      debugPrint("차단 선택됨");
+                                      // 차단 로직을 여기에 추가
+                                    }
+                                  },
                                 ),
-                              ),
                             ],
                           ),
 

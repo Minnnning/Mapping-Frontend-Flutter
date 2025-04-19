@@ -27,14 +27,20 @@ class _CommentViewState extends State<CommentView> {
   /// 🔹 댓글 불러오기
   Future<void> _loadComments() async {
     List<int>? commentIds = await CommentService.fetchCommentIds(widget.memoId);
+
+    if (!mounted) return; // ✅ 위젯이 여전히 살아있는지 확인
+
     if (commentIds != null) {
       List<Map<String, dynamic>> fetchedComments =
           await CommentService.fetchCommentDetails(commentIds);
+
+      if (!mounted) return; // ✅ 두 번째 비동기 작업 이후에도 확인
       setState(() {
         comments = fetchedComments;
         isLoading = false;
       });
     } else {
+      if (!mounted) return;
       setState(() => isLoading = false);
     }
   }

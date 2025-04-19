@@ -38,6 +38,12 @@ class MarkerDetailService {
         if (data['success'] == true) {
           return data['data']; // 상세 메모 데이터 반환
         }
+      } else if (response.statusCode == 404) {
+        // ❗삭제 또는 차단된 메모일 경우
+        return {
+          'title': 'x',
+          'content': '삭제되었거나 차단된 메모입니다',
+        };
       } else {
         print("❌ API 요청 실패: ${response.statusCode}");
       }
