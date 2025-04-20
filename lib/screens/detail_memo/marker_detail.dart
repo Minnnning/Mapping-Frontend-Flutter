@@ -6,6 +6,7 @@ import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../../services/like_service.dart';
 
+import 'memo_report_dialog.dart';
 import '../edit_memo_screen.dart';
 import 'memo_delete_dialog.dart';
 import 'comment_screen.dart';
@@ -402,7 +403,22 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                       }
                                     } else if (value == 'report') {
                                       debugPrint("신고 선택됨");
-                                      // TODO: 신고 로직
+                                      final success =
+                                          await showMemoReportDialog(
+                                        context,
+                                        markerProvider.selectedMarkerId,
+                                      );
+                                      // 다이얼로그가 닫힌 후, 이 context는 여전히 유효하므로 안전합니다.
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            success
+                                                ? '신고가 접수되었습니다.'
+                                                : '신고에 실패했습니다.',
+                                          ),
+                                        ),
+                                      );
                                     } else if (value == 'block') {
                                       debugPrint("차단 선택됨");
                                       // TODO: 차단 로직
