@@ -10,6 +10,7 @@ import 'memo_report_dialog.dart';
 import '../edit_memo_screen.dart';
 import 'memo_delete_dialog.dart';
 import 'comment_screen.dart';
+import '../user_block_dialog.dart';
 
 class ResizableDetailBar extends StatefulWidget {
   const ResizableDetailBar({Key? key}) : super(key: key);
@@ -421,7 +422,26 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                       );
                                     } else if (value == 'block') {
                                       debugPrint("차단 선택됨");
-                                      // TODO: 차단 로직
+                                      final update = await showUserBlockDialog(
+                                          context, memoDetail!['authorId']);
+
+                                      if (update) {
+                                        Provider.of<MarkerProvider>(context,
+                                                listen: false)
+                                            .selectMarker(0); // 마커 선택 해제
+                                        setState(() {
+                                          memoDetail = null; // 상세 내용 초기화
+                                        });
+                                        _controller.animateTo(
+                                          0.0,
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                        Provider.of<MarkerProvider>(context,
+                                                listen: false)
+                                            .requestRefresh(); // 새로고침
+                                      }
                                     }
                                   },
                                 ),
