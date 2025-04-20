@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/memo_input_service.dart';
+import '../../providers/marker_provider.dart';
+import 'package:provider/provider.dart';
 import '../../theme/colors.dart';
 
 class MemoInputScreen2 extends StatefulWidget {
@@ -83,6 +85,8 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("메모가 성공적으로 생성되었습니다.")),
         );
+        // ✅ 마커 새로고침 요청
+        Provider.of<MarkerProvider>(context, listen: false).requestRefresh();
         // 두 단계 이전 화면으로 이동
         Navigator.pop(context); // MemoInputScreen2 pop
         Navigator.pop(context); // MemoInputScreen1 pop

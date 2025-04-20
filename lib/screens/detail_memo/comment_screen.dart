@@ -79,8 +79,8 @@ class _CommentViewState extends State<CommentView> {
                         itemBuilder: (context, index) {
                           final comment = comments[index];
                           final bool isModified = comment['modify'] == true;
-                          final bool myLike = comment['myLike'] == true;
-                          final int likeCnt = comment['likeCnt'] ?? 0;
+//                          final bool myLike = comment['myLike'] == true;
+//                          final int likeCnt = comment['likeCnt'] ?? 0;
 
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(
