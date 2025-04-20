@@ -6,6 +6,7 @@ import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../../services/like_service.dart';
 
+import '../edit_memo_screen.dart';
 import 'memo_delete_dialog.dart';
 import 'comment_screen.dart';
 
@@ -345,7 +346,37 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                   onSelected: (String value) async {
                                     if (value == 'edit') {
                                       debugPrint("수정 선택됨");
-                                      // TODO: 수정 로직
+
+                                      final bool? updated =
+                                          await Navigator.push<bool>(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EditMemoScreen(
+                                            memoId:
+                                                markerProvider.selectedMarkerId,
+                                            initialTitle: memoDetail!['title'],
+                                            initialContent:
+                                                memoDetail!['content'],
+                                            initialCategory:
+                                                memoDetail!['category'],
+                                            initialImageUrls:
+                                                (memoDetail!['images']
+                                                            as List<dynamic>?)
+                                                        ?.map(
+                                                            (e) => e.toString())
+                                                        .toList() ??
+                                                    <String>[],
+                                          ),
+                                        ),
+                                      );
+
+                                      if (updated == true) {
+                                        Provider.of<MarkerProvider>(context,
+                                                listen: false)
+                                            .requestRefresh();
+                                        await _fetchMemoDetail(
+                                            markerProvider.selectedMarkerId);
+                                      }
                                     } else if (value == 'delete') {
                                       debugPrint("삭제 선택됨");
                                       final deleted =
