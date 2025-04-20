@@ -342,23 +342,39 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                       ];
                                     }
                                   },
-                                  onSelected: (String value) {
+                                  onSelected: (String value) async {
                                     if (value == 'edit') {
-                                      // 수정 동작
                                       debugPrint("수정 선택됨");
-                                      // 수정 로직을 여기에 추가
+                                      // TODO: 수정 로직
                                     } else if (value == 'delete') {
                                       debugPrint("삭제 선택됨");
-                                      showMemoDeleteDialog(context,
-                                          markerProvider.selectedMarkerId);
+                                      final deleted =
+                                          await showMemoDeleteDialog(context,
+                                              markerProvider.selectedMarkerId);
+
+                                      if (deleted) {
+                                        Provider.of<MarkerProvider>(context,
+                                                listen: false)
+                                            .selectMarker(0); // 마커 선택 해제
+                                        setState(() {
+                                          memoDetail = null; // 상세 내용 초기화
+                                        });
+                                        _controller.animateTo(
+                                          0.0,
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                        );
+                                        Provider.of<MarkerProvider>(context,
+                                                listen: false)
+                                            .requestRefresh(); // 새로고침
+                                      }
                                     } else if (value == 'report') {
-                                      // 신고 동작
                                       debugPrint("신고 선택됨");
-                                      // 신고 로직을 여기에 추가
+                                      // TODO: 신고 로직
                                     } else if (value == 'block') {
-                                      // 차단 동작
                                       debugPrint("차단 선택됨");
-                                      // 차단 로직을 여기에 추가
+                                      // TODO: 차단 로직
                                     }
                                   },
                                 ),

@@ -29,6 +29,17 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _initialize();
+
+    // Provider에서 새로고침 요청 감지
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MarkerProvider>(context, listen: false).addListener(() {
+        final provider = Provider.of<MarkerProvider>(context, listen: false);
+        if (provider.refreshRequested) {
+          _forceFetchMarkers(); // 새로고침
+          provider.completeRefresh(); // 요청 처리 완료
+        }
+      });
+    });
   }
 
   Future<void> _initialize() async {

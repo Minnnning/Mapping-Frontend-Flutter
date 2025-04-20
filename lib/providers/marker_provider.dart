@@ -8,6 +8,9 @@ class MarkerProvider with ChangeNotifier {
   String _selectedCategory = "전체";
   int _selectedMarkerId = 0;
 
+  bool _refreshRequested = false;
+  bool get refreshRequested => _refreshRequested;
+
   Set<Marker> get markers => _markers;
   String get selectedCategory => _selectedCategory;
   int get selectedMarkerId => _selectedMarkerId;
@@ -47,5 +50,16 @@ class MarkerProvider with ChangeNotifier {
   void selectMarker(int markerId) {
     _selectedMarkerId = markerId;
     notifyListeners();
+  }
+
+  /// 🔄 외부에서 강제로 새로고침 요청
+  void requestRefresh() {
+    _refreshRequested = true;
+    notifyListeners();
+  }
+
+  /// ✅ 새로고침이 끝났다고 처리
+  void completeRefresh() {
+    _refreshRequested = false;
   }
 }
