@@ -7,6 +7,7 @@ import '../models/user_model.dart';
 import 'activity_memo/commented_memo_screen.dart';
 import 'activity_memo/liked_memo_screen.dart';
 import 'activity_memo/my_memos_screen.dart';
+import 'blocked_user/blocked_user_screen.dart';
 import 'change_info_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -50,8 +51,9 @@ class LoginScreen extends StatelessWidget {
                   ? buildLoginButton(context)
                   : buildUserActions(context, user),
               if (user != null) buildBlockedUsersButton(context),
-              const Spacer(),
+              buildDivider(),
               buildLicenseButton(context),
+              const Spacer(),
               const Padding(
                 padding: EdgeInsets.only(bottom: 16),
                 child: Text('문의하기 이메일: team.mapping.app@gmail.com'),
@@ -242,7 +244,10 @@ class LoginScreen extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 16.0),
           width: double.infinity,
           child: TextButton(
-            onPressed: () => print('🚫 차단한 사용자 클릭됨'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BlockedUserScreen()),
+            ),
             style: TextButton.styleFrom(
               alignment: Alignment.centerLeft,
               foregroundColor: Colors.black,
@@ -259,10 +264,10 @@ Widget buildLicenseButton(BuildContext context) {
   return Column(
     children: [
       Container(
-        // decoration: BoxDecoration(
-        //   color: boxGray,
-        //   borderRadius: BorderRadius.circular(9),
-        // ),
+        decoration: BoxDecoration(
+          color: boxGray,
+          borderRadius: BorderRadius.circular(9),
+        ),
         padding: const EdgeInsets.only(left: 16, right: 16),
         margin: const EdgeInsets.symmetric(horizontal: 16.0),
         width: double.infinity,
