@@ -137,6 +137,7 @@ class _MapScreenState extends State<MapScreen> {
                 CameraPosition(target: _currentLocation, zoom: 16),
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
             markers: Provider.of<MarkerProvider>(context).markers,
           ),
           Positioned(
