@@ -3,9 +3,11 @@ import '../../services/comment_service.dart';
 import 'package:provider/provider.dart';
 import 'comment_input_bar.dart';
 import 'report_dialog.dart';
+import '../user_block_dialog.dart';
 import '../../providers/user_provider.dart';
 import '../../services/like_service.dart';
 import '../../theme/colors.dart';
+import '../../providers/marker_provider.dart';
 
 class CommentView extends StatefulWidget {
   final int memoId;
@@ -265,10 +267,21 @@ class _CommentViewState extends State<CommentView> {
                                 break;
                               case 'block':
                                 // TODO: 차단 로직
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('사용자가 차단되었습니다.')),
-                                );
+                                final update = await showUserBlockDialog(
+                                    context, comment['writerId']);
+                                if (update) {
+                                  Provider.of<MarkerProvider>(context,
+                                          listen: false)
+                                      .selectMarker(0); // 마커 선택 해제
+
+                                  Provider.of<MarkerProvider>(context,
+                                          listen: false)
+                                      .requestRefresh(); // 새로고침
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('사용자가 차단되었습니다.')),
+                                  );
+                                }
                                 break;
                             }
                           },
