@@ -6,7 +6,7 @@ import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../../services/like_service.dart';
 
-import 'memo_report_dialog.dart';
+import 'report_dialog.dart';
 import '../edit_memo_screen.dart';
 import 'memo_delete_dialog.dart';
 import 'comment_screen.dart';
@@ -404,8 +404,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                       }
                                     } else if (value == 'report') {
                                       debugPrint("신고 선택됨");
-                                      final success =
-                                          await showMemoReportDialog(
+                                      final success = await showReportDialog(
                                         context,
                                         markerProvider.selectedMarkerId,
                                       );

@@ -14,7 +14,7 @@ const _reportReasons = {
 
 /// 다이얼로그에서는 단순히 사용자가 '신고' 버튼을 눌렀는지,
 /// 그리고 실제 API 호출이 성공했는지만 반환합니다.
-Future<bool> showMemoReportDialog(BuildContext context, int memoId) async {
+Future<bool> showReportDialog(BuildContext context, int memoId) async {
   String? _selectedReason = _reportReasons.keys.first;
 
   final result = await showDialog<bool>(
@@ -22,11 +22,11 @@ Future<bool> showMemoReportDialog(BuildContext context, int memoId) async {
     builder: (context) => StatefulBuilder(
       builder: (context, setState) {
         return AlertDialog(
-          title: const Text('메모 신고'),
+          title: const Text('신고'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('신고 사유를 선택하세요.'),
+              const Text('사유를 선택하세요.'),
               const SizedBox(height: 12),
               ..._reportReasons.entries.map((e) {
                 return RadioListTile<String>(

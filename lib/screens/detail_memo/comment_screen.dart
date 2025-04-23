@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/comment_service.dart';
 import 'package:provider/provider.dart';
 import 'comment_input_bar.dart';
+import 'report_dialog.dart';
 import '../../providers/user_provider.dart';
 import '../../services/like_service.dart';
 import '../../theme/colors.dart';
@@ -248,9 +249,18 @@ class _CommentViewState extends State<CommentView> {
                                 }
                                 break;
                               case 'report':
-                                // TODO: 신고 로직
+                                debugPrint("신고 선택됨");
+                                final success = await showReportDialog(
+                                  context,
+                                  comment['id'],
+                                );
+                                // 다이얼로그가 닫힌 후, 이 context는 여전히 유효하므로 안전합니다.
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('신고가 접수되었습니다.')),
+                                  SnackBar(
+                                    content: Text(
+                                      success ? '신고가 접수되었습니다.' : '신고에 실패했습니다.',
+                                    ),
+                                  ),
                                 );
                                 break;
                               case 'block':
