@@ -53,7 +53,7 @@ class _CommentInputBarState extends State<CommentInputBar> {
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.shade300)),
+        border: Border(top: BorderSide(color: Colors.grey)),
       ),
       child: Row(
         children: [

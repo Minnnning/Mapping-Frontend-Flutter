@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'comment_input_bar.dart';
 import '../../providers/user_provider.dart';
 import '../../services/like_service.dart';
+import '../../theme/colors.dart';
 
 class CommentView extends StatefulWidget {
   final int memoId;
@@ -84,17 +85,21 @@ class _CommentViewState extends State<CommentView> {
               // “수정 중” UI
               if (_editingCommentId == id) {
                 return ListTile(
+                  contentPadding: EdgeInsets.zero, // ✅ 기본 좌우 패딩 제거
                   title: TextField(
                     controller: _editController,
-                    decoration: const InputDecoration(
-                      hintText: "댓글을 수정하세요",
+                    decoration: InputDecoration(
+                      hintText: "댓글을 수정하세요...",
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                      isDense: true,
                     ),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.check, color: Colors.green),
+                      TextButton(
                         onPressed: () async {
                           final newText = _editController.text.trim();
                           if (newText.isEmpty) return;
@@ -114,12 +119,56 @@ class _CommentViewState extends State<CommentView> {
                             );
                           }
                         },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero, // TextButton 자체 패딩 제거
+                          minimumSize: Size.zero, // 최소 크기 제거
+                          tapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap, // 터치 영역 최소화
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: mainColor,
+                            borderRadius: BorderRadius.circular(9.0),
+                          ),
+                          child: const Text(
+                            "수정",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      TextButton(
                         onPressed: () {
                           setState(() => _editingCommentId = null);
                         },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero, // TextButton 자체 패딩 제거
+                          minimumSize: Size.zero, // 최소 크기 제거
+                          tapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap, // 터치 영역 최소화
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: boxGray,
+                            borderRadius: BorderRadius.circular(9.0),
+                          ),
+                          child: const Text(
+                            "취소",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -128,144 +177,162 @@ class _CommentViewState extends State<CommentView> {
 
               // 일반 표시 UI
               return ListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                leading: CircleAvatar(
-                  backgroundImage: comment['profileImageUrl'] != null
-                      ? NetworkImage(comment['profileImageUrl'])
-                      : null,
-                  child: comment['profileImageUrl'] == null
-                      ? const Icon(Icons.person, color: Colors.white)
-                      : null,
+                dense: true,
+                horizontalTitleGap: 10,
+                minVerticalPadding: 1,
+                //tileColor: Colors.yellow.withOpacity(0.2), // ListTile 영역
+                contentPadding: EdgeInsets.zero, // ✅ 기본 좌우 패딩 제거
+                leading: Container(
+                  //color: Colors.blue.withOpacity(0.3), // Avatar 영역 확인
+                  child: CircleAvatar(
+                    backgroundImage: comment['profileImageUrl'] != null
+                        ? NetworkImage(comment['profileImageUrl'])
+                        : null,
+                    child: comment['profileImageUrl'] == null
+                        ? const Icon(Icons.person, color: Colors.white)
+                        : null,
+                  ),
                 ),
-                title: Row(
-                  children: [
-                    Text(
-                      comment['nickname'] ?? '익명',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const Spacer(),
-                    if (isLoggedIn)
-                      PopupMenuButton<String>(
-                        onSelected: (value) async {
-                          switch (value) {
-                            case 'edit':
-                              // 수정 모드로 전환
-                              _editController.text = comment['comment'] ?? '';
-                              setState(() => _editingCommentId = id);
-                              break;
-                            case 'delete':
-                              final ok = await showDialog<bool>(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: const Text('댓글 삭제'),
-                                      content: const Text('정말 이 댓글을 삭제하시겠습니까?'),
-                                      actions: [
-                                        TextButton(
-                                          child: const Text('취소'),
-                                          onPressed: () =>
-                                              Navigator.of(ctx).pop(false),
-                                        ),
-                                        TextButton(
-                                          child: const Text('삭제'),
-                                          onPressed: () async {
-                                            final success = await CommentService
-                                                .deleteComment(id);
-                                            Navigator.of(ctx).pop(success);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ) ??
-                                  false;
-                              if (ok) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('댓글이 삭제되었습니다.')),
-                                );
-                                _loadComments();
-                              }
-                              break;
-                            case 'report':
-                              // TODO: 신고 로직
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('신고가 접수되었습니다.')),
-                              );
-                              break;
-                            case 'block':
-                              // TODO: 차단 로직
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('사용자가 차단되었습니다.')),
-                              );
-                              break;
-                          }
-                        },
-                        itemBuilder: (_) {
-                          if (isMine) {
-                            return const [
-                              PopupMenuItem(value: 'edit', child: Text('수정')),
-                              PopupMenuItem(value: 'delete', child: Text('삭제')),
-                            ];
-                          } else {
-                            return const [
-                              PopupMenuItem(value: 'report', child: Text('신고')),
-                              PopupMenuItem(value: 'block', child: Text('차단')),
-                            ];
-                          }
-                        },
+                title: Container(
+                  //color: Colors.green.withOpacity(0.3), // title 영역
+                  child: Row(
+                    children: [
+                      Text(
+                        comment['nickname'] ?? '익명',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ), // 줄 간격 최소화),
                       ),
-                  ],
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(comment['comment'] ?? ''),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          (comment['updatedAt']?.split(' ')[0] ?? '') +
-                              (isModified ? ' (수정됨)' : ''),
-                          style:
-                              const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: isLoggedIn
-                              ? () async {
-                                  final success =
-                                      await LikeService.likeComment(id);
-                                  if (success) _loadComments();
+                      const Spacer(),
+                      if (isLoggedIn)
+                        PopupMenuButton<String>(
+                          onSelected: (value) async {
+                            switch (value) {
+                              case 'edit':
+                                // 수정 모드로 전환
+                                _editController.text = comment['comment'] ?? '';
+                                setState(() => _editingCommentId = id);
+                                break;
+                              case 'delete':
+                                final ok = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text('댓글 삭제'),
+                                        content:
+                                            const Text('정말 이 댓글을 삭제하시겠습니까?'),
+                                        actions: [
+                                          TextButton(
+                                            child: const Text('취소'),
+                                            onPressed: () =>
+                                                Navigator.of(ctx).pop(false),
+                                          ),
+                                          TextButton(
+                                            child: const Text('삭제'),
+                                            onPressed: () async {
+                                              final success =
+                                                  await CommentService
+                                                      .deleteComment(id);
+                                              Navigator.of(ctx).pop(success);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ) ??
+                                    false;
+                                if (ok) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('댓글이 삭제되었습니다.')),
+                                  );
+                                  _loadComments();
                                 }
-                              : null,
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.favorite,
-                                size: 16,
-                                color: comment['myLike'] == true
-                                    ? Colors.red
-                                    : Colors.grey,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                (comment['likeCnt'] ?? 0).toString(),
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.grey),
-                              ),
-                            ],
-                          ),
+                                break;
+                              case 'report':
+                                // TODO: 신고 로직
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('신고가 접수되었습니다.')),
+                                );
+                                break;
+                              case 'block':
+                                // TODO: 차단 로직
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('사용자가 차단되었습니다.')),
+                                );
+                                break;
+                            }
+                          },
+                          itemBuilder: (_) {
+                            if (isMine) {
+                              return const [
+                                PopupMenuItem(value: 'edit', child: Text('수정')),
+                                PopupMenuItem(
+                                    value: 'delete', child: Text('삭제')),
+                              ];
+                            } else {
+                              return const [
+                                PopupMenuItem(
+                                    value: 'report', child: Text('신고')),
+                                PopupMenuItem(
+                                    value: 'block', child: Text('차단')),
+                              ];
+                            }
+                          },
                         ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+                subtitle: Container(
+                  //color: Colors.purple.withOpacity(0.2), // subtitle 전체 배경
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(comment['comment'] ?? ''),
+                      Row(
+                        children: [
+                          Text(
+                            (comment['updatedAt']?.split(' ')[0] ?? '') +
+                                (isModified ? ' (수정됨)' : ''),
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: isLoggedIn
+                                ? () async {
+                                    final success =
+                                        await LikeService.likeComment(id);
+                                    if (success) _loadComments();
+                                  }
+                                : null,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.favorite,
+                                  size: 16,
+                                  color: comment['myLike'] == true
+                                      ? Colors.red
+                                      : Colors.grey,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  (comment['likeCnt'] ?? 0).toString(),
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
             separatorBuilder: (_, __) => const Divider(
               color: Colors.grey,
               thickness: 1,
-              indent: 10,
-              endIndent: 10,
               height: 1,
             ),
           ),

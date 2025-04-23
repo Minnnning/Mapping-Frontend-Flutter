@@ -448,7 +448,9 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                             ],
                           ),
 
-                          const Divider(),
+                          const Divider(
+                            height: 1,
+                          ),
                           CommentView(
                               key: ValueKey(markerProvider.selectedMarkerId),
                               memoId: markerProvider.selectedMarkerId),
