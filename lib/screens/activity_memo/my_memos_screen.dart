@@ -14,21 +14,29 @@ class MyMemoScreen extends StatefulWidget {
 
 class _MyMemoScreenState extends State<MyMemoScreen> {
   final MemoListService _memoListService = MemoListService();
-  late Future<List<MemoList>> _myMemos;
+  late Future<List<MemoList>> _memos;
 
   @override
   void initState() {
     super.initState();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    AuthService().fetchUser(userProvider).then((user) {
-      if (user != null) {
-        print('유저 정보: ${user.nickname}');
-      } else {
-        print('유저 정보 가져오기 실패');
-      }
-    });
+    _loadUserAndMemos();
+  }
 
-    _myMemos = _memoListService.fetchMyMemos();
+  void _loadUserAndMemos() {
+    // 유저 정보 로드
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    AuthService().fetchUser(userProvider);
+    // 초기 메모 목록 로드
+    _memos = _memoListService.fetchMyMemos();
+  }
+
+  Future<void> _refreshMemos() async {
+    setState(() {
+      // future 를 새로 만들어서 FutureBuilder 가 다시 실행되도록
+      _memos = _memoListService.fetchMyMemos();
+    });
+    // 실제로 데이터를 기다리려면:
+    await _memos;
   }
 
   @override
@@ -40,7 +48,7 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
       ),
       backgroundColor: Colors.white,
       body: FutureBuilder<List<MemoList>>(
-        future: _myMemos,
+        future: _memos,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -52,62 +60,60 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
 
           List<MemoList> memos = snapshot.data!;
 
-          return ListView.builder(
-            itemCount: memos.length,
-            itemBuilder: (context, index) {
-              MemoList memo = memos[index];
-
-              return Card(
-                color: boxGray,
-                margin: EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text(
-                    memo.title,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(memo.content),
-                      SizedBox(height: 4),
-                      Text(
-                        '카테고리: ${memo.category}',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      Text(
-                        '좋아요: ${memo.likeCnt}, 싫어요: ${memo.hateCnt}',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      if (memo.secret != null && memo.secret!)
-                        Text('🔒 비공개 메모', style: TextStyle(color: Colors.red)),
-                      if (memo.images.isNotEmpty)
-                        Container(
-                          height: 100,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: memo.images.map((img) {
-                              return Padding(
-                                padding: EdgeInsets.all(4.0),
-                                child: Image.network(img,
-                                    width: 100, fit: BoxFit.cover),
-                              );
-                            }).toList(),
+          return RefreshIndicator(
+            onRefresh: _refreshMemos,
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(), // 빈 화면에서도 스크롤 가능
+              itemCount: memos.length,
+              itemBuilder: (context, index) {
+                final memo = memos[index];
+                return Card(
+                  color: boxGray,
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(memo.title,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(memo.content),
+                        SizedBox(height: 4),
+                        Text('카테고리: ${memo.category}',
+                            style: TextStyle(color: Colors.grey)),
+                        Text('좋아요: ${memo.likeCnt}, 싫어요: ${memo.hateCnt}',
+                            style: TextStyle(color: Colors.grey)),
+                        if (memo.images.isNotEmpty)
+                          Container(
+                            height: 100,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: memo.images.map((img) {
+                                return Padding(
+                                  padding: EdgeInsets.all(4.0),
+                                  child: Image.network(img,
+                                      width: 100, fit: BoxFit.cover),
+                                );
+                              }).toList(),
+                            ),
                           ),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MemoDetailScreen(memoId: memo.id),
                         ),
-                    ],
+                      ).then((shouldRefresh) {
+                        if (shouldRefresh == true) {
+                          _refreshMemos();
+                        }
+                      });
+                    },
                   ),
-                  onTap: () {
-                    // MemoDetailScreen으로 이동하면서 memo.id 전달
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MemoDetailScreen(memoId: memo.id),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

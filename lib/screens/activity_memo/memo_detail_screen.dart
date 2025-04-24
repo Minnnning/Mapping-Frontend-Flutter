@@ -5,6 +5,10 @@ import '../../services/marker_detail_service.dart';
 import '../detail_memo/comment_screen.dart';
 import '../../services/like_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../detail_memo/memo_delete_dialog.dart';
+import '../detail_memo/report_dialog.dart';
+import '../edit_memo_screen.dart';
+import '../user_block_dialog.dart';
 
 class MemoDetailScreen extends StatefulWidget {
   final int memoId;
@@ -75,22 +79,40 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                     children: [
                       Expanded(
                           child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start, // <-- 이것만 있으면
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             memoDetail!['title'] ?? "제목 없음",
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Text(
-                            memoDetail!['category'] ?? "카테고리",
-                            style: const TextStyle(
-                              color: Colors.grey,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                memoDetail!['category'] ?? "카테고리",
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                (memoDetail!['date'] ?? "날짜")
+                                    .split(':')
+                                    .first, // ':' 기준으로 자르고 첫 번째 요소만 사용
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              if (memoDetail!['certified'] == true)
+                                const Icon(Icons.verified,
+                                    color: Colors.grey, size: 11),
+                            ],
                           )
                         ],
                       )),
@@ -176,12 +198,6 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 16),
-                        const Text(
-                          '위치',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
                         SizedBox(
                           height: 200,
                           child: ClipRRect(
@@ -267,14 +283,94 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                       ),
                       Text('${memoDetail!['hateCnt'] ?? 0}'),
                       const Spacer(),
-                      Text(
-                        (memoDetail!['date'] ?? "날짜")
-                            .split(':')
-                            .first, // ':' 기준으로 자르고 첫 번째 요소만 사용
-                        style: const TextStyle(
-                          color: Colors.grey,
+                      if (isLoggedIn)
+                        PopupMenuButton(
+                          icon: const Icon(Icons.more_horiz),
+                          color: Colors.white,
+                          itemBuilder: (BuildContext context) {
+                            if (memoDetail!['myMemo'] == true) {
+                              // myMemo가 true일 때 수정/삭제 메뉴 표시
+                              return [
+                                PopupMenuItem<String>(
+                                  value: 'edit',
+                                  child: Text('수정'),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'delete',
+                                  child: Text('삭제'),
+                                ),
+                              ];
+                            } else {
+                              // myMemo가 false일 때 신고/차단 메뉴 표시
+                              return [
+                                PopupMenuItem<String>(
+                                  value: 'report',
+                                  child: Text('신고'),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'block',
+                                  child: Text('차단'),
+                                ),
+                              ];
+                            }
+                          },
+                          onSelected: (String value) async {
+                            if (value == 'edit') {
+                              debugPrint("수정 선택됨");
+
+                              final bool? updated = await Navigator.push<bool>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditMemoScreen(
+                                    memoId: memoDetail!['id'],
+                                    initialTitle: memoDetail!['title'],
+                                    initialContent: memoDetail!['content'],
+                                    initialCategory: memoDetail!['category'],
+                                    initialImageUrls: (memoDetail!['images']
+                                                as List<dynamic>?)
+                                            ?.map((e) => e.toString())
+                                            .toList() ??
+                                        <String>[],
+                                  ),
+                                ),
+                              );
+
+                              if (updated == true) {
+                                _fetchMemoDetail(widget.memoId);
+                              }
+                            } else if (value == 'delete') {
+                              debugPrint("삭제 선택됨");
+                              final deleted = await showMemoDeleteDialog(
+                                  context, memoDetail!['id']);
+
+                              if (deleted) {
+                                Navigator.of(context).pop(true);
+                              }
+                            } else if (value == 'report') {
+                              debugPrint("신고 선택됨");
+                              final success = await showReportDialog(
+                                context,
+                                memoDetail!['id'],
+                              );
+                              // 다이얼로그가 닫힌 후, 이 context는 여전히 유효하므로 안전합니다.
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    success ? '신고가 접수되었습니다.' : '신고에 실패했습니다.',
+                                  ),
+                                ),
+                              );
+                            } else if (value == 'block') {
+                              debugPrint("차단 선택됨");
+                              final update = await showUserBlockDialog(
+                                  context, memoDetail!['authorId']);
+
+                              if (update) {
+                                Navigator.of(context).pop(true);
+                              }
+                            }
+                          },
                         ),
-                      ),
                     ],
                   ),
                   const Divider(),

@@ -134,7 +134,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                   Text(
                                     memoDetail!['title'] ?? "제목 없음",
                                     style: const TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -145,6 +145,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                         memoDetail!['category'] ?? "카테고리",
                                         style: const TextStyle(
                                           color: Colors.grey,
+                                          fontSize: 11,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
@@ -154,12 +155,13 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                                             .first, // ':' 기준으로 자르고 첫 번째 요소만 사용
                                         style: const TextStyle(
                                           color: Colors.grey,
+                                          fontSize: 11,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
                                       if (memoDetail!['certified'] == true)
                                         const Icon(Icons.verified,
-                                            color: Colors.grey),
+                                            color: Colors.grey, size: 11),
                                     ],
                                   )
                                 ],
