@@ -31,7 +31,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
 
   void _onSheetScroll() {
     if (_controller.isAttached) {
-      final now = _controller.size >= 0.9;
+      final now = _controller.size >= 0.6;
       if (now != isExpanded) setState(() => isExpanded = now);
     }
     if (_controller.size == 0.0) {
@@ -72,6 +72,27 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<UserProvider>().user != null;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+// 1. 텍스트 높이 대충 추정
+    final contentLength = memoDetail?['content']?.length ?? 0;
+    final contentHeightEstimate = contentLength * 0.5; // 글자 수 기반 대충 높이 추정
+
+// 2. 사진이 있으면 150px 추가
+    final hasImages = memoDetail?['images'] != null &&
+        (memoDetail!['images'] as List).isNotEmpty;
+    final imageHeight = hasImages ? 180.0 : 0.0;
+
+// 3. 전체 컨텐츠 높이 추정
+    final totalContentHeightEstimate = contentHeightEstimate + imageHeight;
+
+// 4. 사용할 sheet의 높이 기준 설정 (예: 0.7만큼 채우고 싶으면)
+    final targetSheetHeight = screenHeight * 0.21;
+
+// 5. 남은 공간 계산 (최소 0, 최대 200)
+    final dynamicSpace = (targetSheetHeight - totalContentHeightEstimate)
+        .clamp(0, 200)
+        .toDouble();
 
     return DraggableScrollableSheet(
       controller: _controller,
@@ -117,6 +138,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                               memoDetail!['images'].isNotEmpty)
                             _buildImageRow(),
                           const SizedBox(height: 8),
+                          SizedBox(height: dynamicSpace),
                           _buildReactions(isLoggedIn),
                           const Divider(),
                           if (isExpanded)
@@ -140,7 +162,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
 
   Widget _buildHeader(bool isLoggedIn) {
     final d = memoDetail!;
-    final id = context.read<MarkerProvider>().selectedMarkerId;
+    //final id = context.read<MarkerProvider>().selectedMarkerId;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
