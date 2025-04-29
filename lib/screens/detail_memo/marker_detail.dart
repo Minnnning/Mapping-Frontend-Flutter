@@ -9,6 +9,7 @@ import 'report_dialog.dart';
 import '../edit_memo_screen.dart';
 import '../user_block_dialog.dart';
 import 'comment_screen.dart';
+import 'comment_input_bar.dart';
 
 class ResizableDetailBar extends StatefulWidget {
   const ResizableDetailBar({Key? key}) : super(key: key);
@@ -73,23 +74,16 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<UserProvider>().user != null;
     final screenHeight = MediaQuery.of(context).size.height;
+    final id = context.read<MarkerProvider>().selectedMarkerId;
 
-// 1. 텍스트 높이 대충 추정
+    // 내용 높이 대략 계산
     final contentLength = memoDetail?['content']?.length ?? 0;
-    final contentHeightEstimate = contentLength * 0.5; // 글자 수 기반 대충 높이 추정
-
-// 2. 사진이 있으면 150px 추가
+    final contentHeightEstimate = contentLength * 0.5;
     final hasImages = memoDetail?['images'] != null &&
         (memoDetail!['images'] as List).isNotEmpty;
     final imageHeight = hasImages ? 180.0 : 0.0;
-
-// 3. 전체 컨텐츠 높이 추정
     final totalContentHeightEstimate = contentHeightEstimate + imageHeight;
-
-// 4. 사용할 sheet의 높이 기준 설정 (예: 0.7만큼 채우고 싶으면)
     final targetSheetHeight = screenHeight * 0.21;
-
-// 5. 남은 공간 계산 (최소 0, 최대 200)
     final dynamicSpace = (targetSheetHeight - totalContentHeightEstimate)
         .clamp(0, 200)
         .toDouble();
@@ -102,59 +96,81 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
       snap: true,
       snapSizes: const [0, 0.4, 0.9],
       builder: (context, scrollCtrl) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-          ),
-          child: ListView(
-            controller: scrollCtrl,
-            padding: EdgeInsets.zero,
-            children: [
-              // drag handle
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                      color: Colors.grey[400],
-                      borderRadius: BorderRadius.circular(2)),
+        return Stack(
+          children: [
+            // 스크롤 가능한 메모 & 댓글 영역
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: isExpanded && isLoggedIn ? 70 : 0, // 입력바 높이만큼 패딩
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+                ),
+                child: ListView(
+                  controller: scrollCtrl,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    // drag handle
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                            color: Colors.grey[400],
+                            borderRadius: BorderRadius.circular(2)),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: memoDetail == null
+                          ? const Center(child: CircularProgressIndicator())
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildHeader(isLoggedIn),
+                                const Divider(),
+                                Text(memoDetail!['content'] ?? ''),
+                                const SizedBox(height: 8),
+                                if (memoDetail!['images'] != null &&
+                                    memoDetail!['images'].isNotEmpty)
+                                  _buildImageRow(),
+                                const SizedBox(height: 8),
+                                SizedBox(height: dynamicSpace),
+                                _buildReactions(isLoggedIn),
+                                const Divider(),
+                                if (isExpanded)
+                                  CommentView(
+                                    key: ValueKey(id),
+                                    memoId: id,
+                                  ),
+                              ],
+                            ),
+                    ),
+                  ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: memoDetail == null
-                    ? const Center(child: CircularProgressIndicator())
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(isLoggedIn),
-                          const Divider(),
-                          Text(memoDetail!['content'] ?? ''),
-                          const SizedBox(height: 8),
-                          if (memoDetail!['images'] != null &&
-                              memoDetail!['images'].isNotEmpty)
-                            _buildImageRow(),
-                          const SizedBox(height: 8),
-                          SizedBox(height: dynamicSpace),
-                          _buildReactions(isLoggedIn),
-                          const Divider(),
-                          if (isExpanded)
-                            CommentView(
-                              key: ValueKey(context
-                                  .read<MarkerProvider>()
-                                  .selectedMarkerId),
-                              memoId: context
-                                  .read<MarkerProvider>()
-                                  .selectedMarkerId,
-                            ),
-                        ],
-                      ),
+            ),
+
+            // 고정된 댓글 입력바
+            if (isExpanded && isLoggedIn)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  color: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: CommentInputBar(
+                    memoId: context.read<MarkerProvider>().selectedMarkerId,
+                  ),
+                ),
               ),
-            ],
-          ),
+          ],
         );
       },
     );
@@ -162,13 +178,13 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
 
   Widget _buildHeader(bool isLoggedIn) {
     final d = memoDetail!;
-    //final id = context.read<MarkerProvider>().selectedMarkerId;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(d['title'] ?? '',
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -184,8 +200,8 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                     padding: EdgeInsets.only(left: 4),
                     child: Icon(Icons.verified, size: 11, color: Colors.grey)),
             ]),
-          ]),
-        ),
+          ],
+        )),
         Row(children: [
           if (d['profileImage'] != null)
             CircleAvatar(
@@ -195,9 +211,90 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
           const SizedBox(width: 8),
           Text(d['nickname'] ?? '',
               style: const TextStyle(fontWeight: FontWeight.bold)),
-          if (isLoggedIn) const SizedBox(width: 4),
-          //if (isLoggedIn) _buildPopupMenu(d),
         ]),
+      ],
+    );
+  }
+
+  Widget _buildImageRow() {
+    final imgs = (memoDetail!['images'] as List).cast<String>();
+    return SizedBox(
+      height: 150,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: imgs.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (ctx, i) => GestureDetector(
+          onTap: () => _showFullImage(imgs[i]),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(imgs[i],
+                width: 150, height: 150, fit: BoxFit.cover),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullImage(String url) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: InteractiveViewer(
+            panEnabled: true,
+            boundaryMargin: EdgeInsets.all(20),
+            minScale: 0.5,
+            maxScale: 3.0,
+            child: Image.network(url, fit: BoxFit.contain),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReactions(bool isLoggedIn) {
+    final id = context.read<MarkerProvider>().selectedMarkerId;
+    final d = memoDetail!;
+    return Row(
+      children: [
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          onPressed: isLoggedIn
+              ? () async {
+                  final ok = await LikeService.likeMemo(id);
+                  if (ok) {
+                    await _fetchDetail(id);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('좋아요!')));
+                  }
+                }
+              : null,
+          icon: Icon(Icons.thumb_up,
+              color: isLoggedIn ? Colors.yellow : Colors.grey),
+        ),
+        Text('${d['likeCnt'] ?? 0}'),
+        const SizedBox(width: 16),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          onPressed: isLoggedIn
+              ? () async {
+                  final ok = await LikeService.hateMemo(id);
+                  if (ok) {
+                    await _fetchDetail(id);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('싫어요')));
+                  }
+                }
+              : null,
+          icon: Icon(Icons.thumb_down,
+              color: isLoggedIn ? Colors.yellow : Colors.grey),
+        ),
+        Text('${d['hateCnt'] ?? 0}'),
+        if (isLoggedIn) const Spacer(),
+        _buildPopupMenu(d),
       ],
     );
   }
@@ -262,91 +359,6 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
               const PopupMenuItem(value: 'report', child: Text('신고')),
               const PopupMenuItem(value: 'block', child: Text('차단'))
             ],
-    );
-  }
-
-  Widget _buildImageRow() {
-    void _showFullImage(String imageUrl) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return Dialog(
-            backgroundColor: Colors.transparent,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: InteractiveViewer(
-                panEnabled: true,
-                boundaryMargin: EdgeInsets.all(20),
-                minScale: 0.5,
-                maxScale: 3.0,
-                child: Image.network(imageUrl, fit: BoxFit.contain),
-              ),
-            ),
-          );
-        },
-      );
-    }
-
-    final imgs = (memoDetail!['images'] as List).cast<String>();
-    return SizedBox(
-      height: 150,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: imgs.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (ctx, i) => GestureDetector(
-          onTap: () => _showFullImage(imgs[i]),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(imgs[i],
-                width: 150, height: 150, fit: BoxFit.cover),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReactions(bool isLoggedIn) {
-    final id = context.read<MarkerProvider>().selectedMarkerId;
-    final d = memoDetail!;
-    return Row(
-      children: [
-        IconButton(
-          visualDensity: VisualDensity.compact,
-          onPressed: isLoggedIn
-              ? () async {
-                  final ok = await LikeService.likeMemo(id);
-                  if (ok) {
-                    await _fetchDetail(id);
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('좋아요!')));
-                  }
-                }
-              : null,
-          icon: Icon(Icons.thumb_up,
-              color: isLoggedIn ? Colors.yellow : Colors.grey),
-        ),
-        Text('${d['likeCnt'] ?? 0}'),
-        const SizedBox(width: 16),
-        IconButton(
-          visualDensity: VisualDensity.compact,
-          onPressed: isLoggedIn
-              ? () async {
-                  final ok = await LikeService.hateMemo(id);
-                  if (ok) {
-                    await _fetchDetail(id);
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('싫어요')));
-                  }
-                }
-              : null,
-          icon: Icon(Icons.thumb_down,
-              color: isLoggedIn ? Colors.yellow : Colors.grey),
-        ),
-        Text('${d['hateCnt'] ?? 0}'),
-        if (isLoggedIn) Spacer(),
-        _buildPopupMenu(d),
-      ],
     );
   }
 }

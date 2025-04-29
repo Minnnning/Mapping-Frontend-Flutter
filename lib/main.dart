@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'screens/map_screen.dart';
 import 'providers/user_provider.dart';
 import 'providers/marker_provider.dart';
+import 'providers/comment_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,13 +19,14 @@ void main() async {
   }
   KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
   var key = await KakaoSdk.origin;
-  debugPrint("key : "+key);
+  debugPrint("key : " + key);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => MarkerProvider()),
+        ChangeNotifierProvider(create: (_) => CommentProvider()),
       ],
       child: const MyApp(),
     ),

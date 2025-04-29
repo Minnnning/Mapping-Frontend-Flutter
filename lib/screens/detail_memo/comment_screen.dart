@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../services/comment_service.dart';
 import 'package:provider/provider.dart';
-import 'comment_input_bar.dart';
 import 'report_dialog.dart';
 import '../user_block_dialog.dart';
 import '../../providers/user_provider.dart';
 import '../../services/like_service.dart';
 import '../../theme/colors.dart';
 import '../../providers/marker_provider.dart';
+import '../../providers/comment_provider.dart';
 
 class CommentView extends StatefulWidget {
   final int memoId;
@@ -21,7 +21,7 @@ class CommentView extends StatefulWidget {
 class _CommentViewState extends State<CommentView> {
   List<Map<String, dynamic>> comments = [];
   bool isLoading = true;
-
+  late CommentProvider _commentProv;
   // 수정 중인 댓글 ID, 그리고 수정용 컨트롤러
   int? _editingCommentId;
   late TextEditingController _editController;
@@ -34,9 +34,30 @@ class _CommentViewState extends State<CommentView> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // context 가 안전한 시점(didChangeDependencies) 에 Provider 를 읽어서 저장
+    _commentProv = Provider.of<CommentProvider>(context, listen: false);
+    // 그리고 리스너 등록
+    _commentProv.removeListener(_onCommentRefreshRequested);
+    _commentProv.addListener(_onCommentRefreshRequested);
+  }
+
+  @override
   void dispose() {
+    // (2) dispose 에선 context 가 아닌 미리 저장해 둔 _commentProv 사용
+    _commentProv.removeListener(_onCommentRefreshRequested);
     _editController.dispose();
     super.dispose();
+  }
+
+  void _onCommentRefreshRequested() {
+    final commentProv = context.read<CommentProvider>();
+    if (commentProv.refreshRequested) {
+      _loadComments().then((_) {
+        commentProv.completeRefresh();
+      });
+    }
   }
 
   Future<void> _loadComments() async {
@@ -55,8 +76,6 @@ class _CommentViewState extends State<CommentView> {
       setState(() => isLoading = false);
     }
   }
-
-  void _onCommentAdded() => _loadComments();
 
   @override
   Widget build(BuildContext context) {
@@ -359,12 +378,7 @@ class _CommentViewState extends State<CommentView> {
               height: 1,
             ),
           ),
-// 수정 후
-        if (isLoggedIn && !isLoading && _editingCommentId == null)
-          CommentInputBar(
-            memoId: widget.memoId,
-            onCommentAdded: _onCommentAdded,
-          ),
+        const SizedBox(height: 30),
       ],
     );
   }

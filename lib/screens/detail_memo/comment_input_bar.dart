@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../services/comment_service.dart';
 import '../../theme/colors.dart';
+import '../../providers/comment_provider.dart';
+import 'package:provider/provider.dart';
 
 class CommentInputBar extends StatefulWidget {
   final int memoId;
-  final VoidCallback onCommentAdded;
 
-  const CommentInputBar(
-      {Key? key, required this.memoId, required this.onCommentAdded})
-      : super(key: key);
+  const CommentInputBar({Key? key, required this.memoId}) : super(key: key);
 
   @override
   _CommentInputBarState createState() => _CommentInputBarState();
@@ -36,7 +35,9 @@ class _CommentInputBarState extends State<CommentInputBar> {
 
     if (success) {
       _controller.clear();
-      widget.onCommentAdded();
+      // 댓글 새로고침 요청
+      context.read<CommentProvider>().requestRefresh();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("댓글이 생성되었습니다!")),
       );
