@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/marker_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/comment_provider.dart';
 import '../../services/marker_detail_service.dart';
 import '../../services/like_service.dart';
 import 'memo_delete_dialog.dart';
@@ -96,81 +97,93 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
       snap: true,
       snapSizes: const [0, 0.4, 0.9],
       builder: (context, scrollCtrl) {
-        return Stack(
-          children: [
-            // 스크롤 가능한 메모 & 댓글 영역
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: isExpanded && isLoggedIn ? 70 : 0, // 입력바 높이만큼 패딩
-              ),
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+          ),
+          child: Stack(
+            children: [
+              // 스크롤 가능한 메모 & 댓글 영역
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: isExpanded && isLoggedIn ? 70 : 0, // 입력바 높이만큼 패딩
                 ),
-                child: ListView(
-                  controller: scrollCtrl,
-                  padding: EdgeInsets.zero,
-                  children: [
-                    // drag handle
-                    Center(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(2)),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: memoDetail == null
-                          ? const Center(child: CircularProgressIndicator())
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildHeader(isLoggedIn),
-                                const Divider(),
-                                Text(memoDetail!['content'] ?? ''),
-                                const SizedBox(height: 8),
-                                if (memoDetail!['images'] != null &&
-                                    memoDetail!['images'].isNotEmpty)
-                                  _buildImageRow(),
-                                const SizedBox(height: 8),
-                                SizedBox(height: dynamicSpace),
-                                _buildReactions(isLoggedIn),
-                                const Divider(),
-                                if (isExpanded)
-                                  CommentView(
-                                    key: ValueKey(id),
-                                    memoId: id,
-                                  ),
-                              ],
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // 고정된 댓글 입력바
-            if (isExpanded && isLoggedIn)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
                 child: Container(
-                  color: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: CommentInputBar(
-                    memoId: context.read<MarkerProvider>().selectedMarkerId,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(16)),
+                    boxShadow: [
+                      BoxShadow(blurRadius: 10, color: Colors.black26)
+                    ],
+                  ),
+                  child: ListView(
+                    controller: scrollCtrl,
+                    padding: EdgeInsets.zero,
+                    children: [
+                      // drag handle
+                      Center(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                              color: Colors.grey[400],
+                              borderRadius: BorderRadius.circular(2)),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: memoDetail == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildHeader(isLoggedIn),
+                                  const Divider(),
+                                  Text(memoDetail!['content'] ?? ''),
+                                  const SizedBox(height: 8),
+                                  if (memoDetail!['images'] != null &&
+                                      memoDetail!['images'].isNotEmpty)
+                                    _buildImageRow(),
+                                  const SizedBox(height: 8),
+                                  SizedBox(height: dynamicSpace),
+                                  _buildReactions(isLoggedIn),
+                                  const Divider(),
+                                  if (isExpanded)
+                                    CommentView(
+                                      key: ValueKey(id),
+                                      memoId: id,
+                                    ),
+                                ],
+                              ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-          ],
+
+              // 고정된 댓글 입력바
+              if (isExpanded &&
+                  isLoggedIn &&
+                  !context.watch<CommentProvider>().isEditing)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    color: Colors.white,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: CommentInputBar(
+                      memoId: context.read<MarkerProvider>().selectedMarkerId,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -293,8 +306,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
               color: isLoggedIn ? Colors.yellow : Colors.grey),
         ),
         Text('${d['hateCnt'] ?? 0}'),
-        if (isLoggedIn) const Spacer(),
-        _buildPopupMenu(d),
+        if (isLoggedIn) ...[const Spacer(), _buildPopupMenu(d)],
       ],
     );
   }

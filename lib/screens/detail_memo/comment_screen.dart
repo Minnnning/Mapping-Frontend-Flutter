@@ -134,6 +134,8 @@ class _CommentViewState extends State<CommentView> {
                               const SnackBar(content: Text('댓글이 수정되었습니다.')),
                             );
                             setState(() => _editingCommentId = null);
+                            Provider.of<CommentProvider>(context, listen: false)
+                                .stopEditing();
                             _loadComments();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -169,6 +171,8 @@ class _CommentViewState extends State<CommentView> {
                       TextButton(
                         onPressed: () {
                           setState(() => _editingCommentId = null);
+                          Provider.of<CommentProvider>(context, listen: false)
+                              .stopEditing();
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero, // TextButton 자체 패딩 제거
@@ -232,6 +236,9 @@ class _CommentViewState extends State<CommentView> {
                             switch (value) {
                               case 'edit':
                                 // 수정 모드로 전환
+                                Provider.of<CommentProvider>(context,
+                                        listen: false)
+                                    .startEditing();
                                 _editController.text = comment['comment'] ?? '';
                                 setState(() => _editingCommentId = id);
                                 break;
