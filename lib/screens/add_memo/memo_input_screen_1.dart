@@ -104,41 +104,44 @@ class _MemoInputScreen1State extends State<MemoInputScreen1> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition:
-                CameraPosition(target: _currentLocation, zoom: 16),
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _fetchCurrentLocation();
-            },
-            markers: _markers,
-            myLocationEnabled: true,
-            onLongPress: _onMapLongPress, // 길게 눌러 마커 추가
-          ),
-          // 안내문 추가
-          Positioned(
-            bottom: 80, // 화면 하단에서 위로 80px 위치
-            left: 50,
-            right: 50,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.8), // 반투명 배경
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Text(
-                "지도를 꾹 눌러서 마커 추가",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+      body: SafeArea(
+        bottom: true,
+        child: Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition:
+                  CameraPosition(target: _currentLocation, zoom: 16),
+              onMapCreated: (controller) {
+                _mapController = controller;
+                _fetchCurrentLocation();
+              },
+              markers: _markers,
+              myLocationEnabled: true,
+              onLongPress: _onMapLongPress, // 길게 눌러 마커 추가
+            ),
+            // 안내문 추가
+            Positioned(
+              bottom: 80, // 화면 하단에서 위로 80px 위치
+              left: 70,
+              right: 70,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.8), // 반투명 배경
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  "지도를 꾹 눌러서 메모 추가",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

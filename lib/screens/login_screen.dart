@@ -43,22 +43,25 @@ class LoginScreen extends StatelessWidget {
                 ),
             ],
           ),
-          body: Column(
-            children: [
-              buildProfileSection(context, user),
-              buildDivider(),
-              user == null
-                  ? buildLoginButton(context)
-                  : buildUserActions(context, user),
-              if (user != null) buildBlockedUsersButton(context),
-              buildDivider(),
-              buildLicenseButton(context),
-              const Spacer(),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 16),
-                child: Text('문의하기 이메일: team.mapping.app@gmail.com'),
-              ),
-            ],
+          body: SafeArea(
+            bottom: true,
+            child: Column(
+              children: [
+                buildProfileSection(context, user),
+                buildDivider(),
+                user == null
+                    ? buildLoginButton(context)
+                    : buildUserActions(context, user),
+                if (user != null) buildBlockedUsersButton(context),
+                buildDivider(),
+                buildLicenseButton(context),
+                const Spacer(),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: Text('문의하기 이메일: team.mapping.app@gmail.com'),
+                ),
+              ],
+            ),
           ),
         );
       },

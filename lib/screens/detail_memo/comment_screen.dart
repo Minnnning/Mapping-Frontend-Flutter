@@ -22,15 +22,11 @@ class _CommentViewState extends State<CommentView> {
   List<Map<String, dynamic>> comments = [];
   bool isLoading = true;
   late CommentProvider _commentProv;
-  // 수정 중인 댓글 ID, 그리고 수정용 컨트롤러
-  int? _editingCommentId;
-  late TextEditingController _editController;
 
   @override
   void initState() {
     super.initState();
     _loadComments();
-    _editController = TextEditingController();
   }
 
   @override
@@ -43,18 +39,12 @@ class _CommentViewState extends State<CommentView> {
     _commentProv.addListener(_onCommentRefreshRequested);
   }
 
-  @override
-  void dispose() {
-    // (2) dispose 에선 context 가 아닌 미리 저장해 둔 _commentProv 사용
-    _commentProv.removeListener(_onCommentRefreshRequested);
-    _editController.dispose();
-    super.dispose();
-  }
-
   void _onCommentRefreshRequested() {
+    if (!mounted) return;
     final commentProv = context.read<CommentProvider>();
     if (commentProv.refreshRequested) {
       _loadComments().then((_) {
+        if (!mounted) return;
         commentProv.completeRefresh();
       });
     }
@@ -104,98 +94,16 @@ class _CommentViewState extends State<CommentView> {
               final bool isModified = comment['modify'] == true;
               final bool isMine = comment['nickname'] == myNickname;
 
-              // “수정 중” UI
-              if (_editingCommentId == id) {
+              // Provider 편집 중인 ID와 같으면 “수정 중…” UI
+              final editingId =
+                  context.watch<CommentProvider>().editingCommentId;
+              if (editingId == id) {
                 return ListTile(
-                  contentPadding: EdgeInsets.zero, // ✅ 기본 좌우 패딩 제거
-                  title: TextField(
-                    controller: _editController,
-                    decoration: InputDecoration(
-                      hintText: "댓글을 수정하세요...",
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                      isDense: true,
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  contentPadding: EdgeInsets.zero,
+                  title: Column(
                     children: [
-                      TextButton(
-                        onPressed: () async {
-                          final newText = _editController.text.trim();
-                          if (newText.isEmpty) return;
-                          final ok = await CommentService.updateComment(
-                            commentId: id,
-                            comment: newText,
-                          );
-                          if (ok) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('댓글이 수정되었습니다.')),
-                            );
-                            setState(() => _editingCommentId = null);
-                            Provider.of<CommentProvider>(context, listen: false)
-                                .stopEditing();
-                            _loadComments();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('댓글 수정에 실패했습니다.')),
-                            );
-                          }
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero, // TextButton 자체 패딩 제거
-                          minimumSize: Size.zero, // 최소 크기 제거
-                          tapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap, // 터치 영역 최소화
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: mainColor,
-                            borderRadius: BorderRadius.circular(9.0),
-                          ),
-                          child: const Text(
-                            "수정",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 5,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() => _editingCommentId = null);
-                          Provider.of<CommentProvider>(context, listen: false)
-                              .stopEditing();
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero, // TextButton 자체 패딩 제거
-                          minimumSize: Size.zero, // 최소 크기 제거
-                          tapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap, // 터치 영역 최소화
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: boxGray,
-                            borderRadius: BorderRadius.circular(9.0),
-                          ),
-                          child: const Text(
-                            "취소",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+                      Text("수정 중 ...",
+                          style: TextStyle(fontStyle: FontStyle.italic)),
                     ],
                   ),
                 );
@@ -235,12 +143,10 @@ class _CommentViewState extends State<CommentView> {
                           onSelected: (value) async {
                             switch (value) {
                               case 'edit':
-                                // 수정 모드로 전환
+                                // Provider 에 편집 시작 알림 (입력바로 처리)
                                 Provider.of<CommentProvider>(context,
                                         listen: false)
-                                    .startEditing();
-                                _editController.text = comment['comment'] ?? '';
-                                setState(() => _editingCommentId = id);
+                                    .startEditing(id, comment['comment'] ?? '');
                                 break;
                               case 'delete':
                                 final ok = await showDialog<bool>(

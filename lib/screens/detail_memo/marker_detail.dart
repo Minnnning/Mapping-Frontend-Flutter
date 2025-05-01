@@ -60,7 +60,12 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
   }
 
   Future<void> _fetchDetail(int id) async {
+    final commentProv = context.read<CommentProvider>();
+    commentProv.stopEditing(); // 편집 상태 종료
+    commentProv.completeRefresh(); // 새로고침 플래그 해제
+
     final data = await MarkerDetailService.fetchMemoDetail(id);
+    if (!mounted) return;
     setState(() => memoDetail = data);
   }
 
@@ -165,10 +170,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                 ),
               ),
 
-              // 고정된 댓글 입력바
-              if (isExpanded &&
-                  isLoggedIn &&
-                  !context.watch<CommentProvider>().isEditing)
+              if (isExpanded && isLoggedIn)
                 Positioned(
                   left: 0,
                   right: 0,

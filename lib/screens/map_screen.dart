@@ -119,66 +119,70 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          GoogleMap(
-            onMapCreated: (controller) {
-              _controller = controller;
-              if (_controller != null) {
-                _fetchMarkers();
-              }
-            },
-            onCameraIdle: () {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _fetchMarkers();
-              });
-            },
-            initialCameraPosition:
-                CameraPosition(target: _currentLocation, zoom: 16),
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            markers: Provider.of<MarkerProvider>(context).markers,
-          ),
-          Positioned(
-            top: 120,
-            right: 5,
-            child: FloatingActionButton(
-              heroTag: 'locationButton',
-              backgroundColor: Colors.white,
-              mini: true,
-              onPressed: _fetchCurrentLocation,
-              child: const Icon(Icons.my_location, color: Colors.black),
+      body: SafeArea(
+        top: false,
+        bottom: true,
+        child: Stack(
+          children: [
+            GoogleMap(
+              onMapCreated: (controller) {
+                _controller = controller;
+                if (_controller != null) {
+                  _fetchMarkers();
+                }
+              },
+              onCameraIdle: () {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _fetchMarkers();
+                });
+              },
+              initialCameraPosition:
+                  CameraPosition(target: _currentLocation, zoom: 16),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              markers: Provider.of<MarkerProvider>(context).markers,
             ),
-          ),
-          Positioned(
-            top: 170,
-            right: 5,
-            child: FloatingActionButton(
-              heroTag: 'refreshMarkersButton',
-              backgroundColor: Colors.white,
-              mini: true,
-              onPressed: _forceFetchMarkers,
-              child: const Icon(Icons.refresh, color: Colors.black),
+            Positioned(
+              top: 120,
+              right: 5,
+              child: FloatingActionButton(
+                heroTag: 'locationButton',
+                backgroundColor: Colors.white,
+                mini: true,
+                onPressed: _fetchCurrentLocation,
+                child: const Icon(Icons.my_location, color: Colors.black),
+              ),
             ),
-          ),
-          if (_controller != null)
-            ResizableSearchBar(mapController: _controller!),
-          ResizableDetailBar(),
-          if (_isLoading)
-            Container(
-              color: Color.fromARGB(101, 255, 255, 255),
-              child: const Center(
-                child: Text(
-                  'Loading...',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+            Positioned(
+              top: 170,
+              right: 5,
+              child: FloatingActionButton(
+                heroTag: 'refreshMarkersButton',
+                backgroundColor: Colors.white,
+                mini: true,
+                onPressed: _forceFetchMarkers,
+                child: const Icon(Icons.refresh, color: Colors.black),
+              ),
+            ),
+            if (_controller != null)
+              ResizableSearchBar(mapController: _controller!),
+            ResizableDetailBar(),
+            if (_isLoading)
+              Container(
+                color: Color.fromARGB(101, 255, 255, 255),
+                child: const Center(
+                  child: Text(
+                    'Loading...',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

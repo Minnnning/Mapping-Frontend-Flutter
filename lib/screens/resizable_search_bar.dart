@@ -34,7 +34,7 @@ class _ResizableSearchBarState extends State<ResizableSearchBar> {
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            //boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black)],
+            boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
           ),
           child: ListView(
             controller: scrollController,
