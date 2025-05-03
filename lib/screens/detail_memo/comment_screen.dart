@@ -112,8 +112,8 @@ class _CommentViewState extends State<CommentView> {
               // 일반 표시 UI
               return ListTile(
                 dense: true,
-                horizontalTitleGap: 10,
-                minVerticalPadding: 1,
+                //horizontalTitleGap: 10,
+                //minVerticalPadding: 1,
                 //tileColor: Colors.yellow.withOpacity(0.2), // ListTile 영역
                 contentPadding: EdgeInsets.zero, // ✅ 기본 좌우 패딩 제거
                 leading: Container(
@@ -233,6 +233,8 @@ class _CommentViewState extends State<CommentView> {
                               ];
                             }
                           },
+                          child: const Icon(Icons.more_vert,
+                              size: 18), // 아이콘 직접 정의
                         ),
                     ],
                   ),

@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Kakao Map App',
+      title: 'Mapping',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
