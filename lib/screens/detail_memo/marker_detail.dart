@@ -349,8 +349,8 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
         }
         if (v == 'report') {
           final res = await showReportDialog(context, id);
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(res ? '신고됨' : '실패')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(res ? '신고 되었습니다.' : '이미 신고 되었습니다.')));
         }
         if (v == 'block') {
           final res = await showUserBlockDialog(context, d['authorId']);

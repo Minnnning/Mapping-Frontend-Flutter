@@ -357,7 +357,7 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    success ? '신고가 접수되었습니다.' : '신고에 실패했습니다.',
+                                    success ? '신고 되었습니다.' : '이미 신고 되었습니다.',
                                   ),
                                 ),
                               );
