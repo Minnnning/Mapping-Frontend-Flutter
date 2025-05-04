@@ -7,6 +7,7 @@ import '../../services/like_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../detail_memo/memo_delete_dialog.dart';
 import '../detail_memo/report_dialog.dart';
+import '../detail_memo/comment_input_bar.dart';
 import '../edit_memo_screen.dart';
 import '../user_block_dialog.dart';
 
@@ -381,6 +382,17 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                 ],
               ),
             ),
+      bottomNavigationBar: isLoggedIn
+          ? Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: SafeArea(
+                child: CommentInputBar(
+                  memoId: widget.memoId,
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
