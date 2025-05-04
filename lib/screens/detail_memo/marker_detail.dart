@@ -174,7 +174,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 0,
+                  bottom: 5, // 댓글입력의 위 아래 그림자가 보임
                   child: Container(
                     color: Colors.white,
                     padding:
