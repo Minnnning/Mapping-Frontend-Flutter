@@ -162,4 +162,41 @@ class AuthService {
       return null;
     }
   }
+
+  // 회원 탈퇴
+  Future<bool> withdraw(UserProvider userProvider) async {
+    try {
+      String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+      if (accessToken == null) {
+        print('회원 탈퇴 실패: 액세스 토큰 없음');
+        return false;
+      }
+
+      final response = await _dio.delete(
+        'https://api.mapping.kro.kr/api/v2/member/withdraw',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'accept': '*/*',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['success']) {
+        print('회원 탈퇴 성공');
+
+        // 탈퇴 후 토큰 삭제 및 유저 정보 초기화
+        await logout(userProvider);
+
+        return true;
+      } else {
+        print('회원 탈퇴 실패: ${response.data}');
+        return false;
+      }
+    } catch (error) {
+      print('회원 탈퇴 중 오류 발생: $error');
+      return false;
+    }
+  }
 }

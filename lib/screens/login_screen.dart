@@ -56,6 +56,7 @@ class LoginScreen extends StatelessWidget {
                 buildDivider(),
                 buildLicenseButton(context),
                 const Spacer(),
+                if (user != null) buildWithdrawalButton(context),
                 const Padding(
                   padding: EdgeInsets.only(bottom: 16),
                   child: Text('문의하기 이메일: team.mapping.app@gmail.com'),
@@ -295,5 +296,54 @@ Widget buildLicenseButton(BuildContext context) {
         ),
       ),
     ],
+  );
+}
+
+Widget buildWithdrawalButton(BuildContext context) {
+  return TextButton(
+    onPressed: () {
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogCtx) {
+          return AlertDialog(
+            title: const Text('회원 탈퇴'),
+            content: const Text(
+              '회원 탈퇴 후 90일간 데이터가 유지되며, 이후 완전히 삭제됩니다.\n만약 90일 안에 재가입하면 기존 정보를 유지할 수 있습니다.\n정말 탈퇴하시겠습니까?',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(dialogCtx).pop(), // 다이얼로그 닫기
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(dialogCtx).pop(); // 먼저 다이얼로그 닫기
+                  final userProvider =
+                      Provider.of<UserProvider>(context, listen: false);
+                  final success = await AuthService().withdraw(userProvider);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        success ? '탈퇴가 완료되었습니다.' : '탈퇴에 실패했습니다.',
+                      ),
+                    ),
+                  );
+                  if (success) {
+                    // 예: 탈퇴 후 로그인 화면으로 되돌아가기
+                    Navigator.of(context).popUntil((r) => r.isFirst);
+                  }
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('탈퇴'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+    child: const Text(
+      '회원 탈퇴',
+      style: TextStyle(color: Colors.grey),
+    ),
   );
 }
