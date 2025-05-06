@@ -1,4 +1,4 @@
-package com.example.mapping_flutter
+package com.min.MappingApp
 
 import io.flutter.embedding.android.FlutterActivity
 
