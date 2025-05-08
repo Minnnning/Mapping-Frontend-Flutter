@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mapping_flutter/theme/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/marker_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/comment_provider.dart';
@@ -57,6 +59,73 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
           duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
       _fetchDetail(prov.selectedMarkerId);
     }
+  }
+
+  Future<void> launchGoogleMaps(double lat, double lng, String destName) async {
+    // 1) Android Google Maps 앱용 인텐트 URI
+    final googleMapsUri = Uri.parse('google.navigation:q=$lat,$lng&mode=w');
+    // 2) fallback) 웹 브라우저용 구글맵 방향 URL
+    final webUri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+
+    // 앱이 해당 인텐트를 처리할 수 있는지 확인
+    if (await canLaunchUrl(googleMapsUri)) {
+      await launchUrl(googleMapsUri);
+    } else if (await canLaunchUrl(webUri)) {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch map for $lat,$lng';
+    }
+  }
+
+  Future<void> launchKakaoMap(double lat, double lng, String destName) async {
+    // 이름에 공백, 한글 등이 들어갈 수 있으니 인코딩
+    final encodedName = Uri.encodeComponent(destName);
+
+    final appUri = Uri.parse('kakaomap://look?p=$lat,$lng');
+    final webUri =
+        Uri.parse('https://map.kakao.com/link/map/$encodedName,$lat,$lng');
+
+    if (await canLaunchUrl(appUri)) {
+      await launchUrl(appUri);
+    } else if (await canLaunchUrl(webUri)) {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch map for $lat,$lng';
+    }
+  }
+
+  void openMapNavigation(
+      BuildContext context, double lat, double lng, String destName) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext ctx) {
+        return SafeArea(
+          bottom: true, // 제스처 영역 고려
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.map),
+                title: const Text('구글 지도'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await launchGoogleMaps(lat, lng, destName);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.map_outlined),
+                title: const Text('카카오 지도'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await launchKakaoMap(lat, lng, destName);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _fetchDetail(int id) async {
@@ -308,7 +377,19 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
               color: isLoggedIn ? Colors.yellow : Colors.grey),
         ),
         Text('${d['hateCnt'] ?? 0}'),
-        if (isLoggedIn) ...[const Spacer(), _buildPopupMenu(d)],
+        const Spacer(),
+        IconButton(
+          icon: Icon(Icons.navigation_rounded, color: mainColor),
+          onPressed: () {
+            openMapNavigation(context, d['lat'], d['lng'], d['title']);
+          },
+        ),
+        if (isLoggedIn) ...[
+          const SizedBox(
+            width: 1,
+          ),
+          _buildPopupMenu(d)
+        ],
       ],
     );
   }

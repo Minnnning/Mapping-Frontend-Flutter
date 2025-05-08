@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers/user_provider.dart';
 import '../../services/marker_detail_service.dart';
@@ -11,6 +12,7 @@ import '../detail_memo/comment_screen.dart';
 import '../detail_memo/comment_input_bar.dart';
 import '../edit_memo_screen.dart';
 import '../user_block_dialog.dart';
+import '../../theme/colors.dart';
 
 class MemoDetailScreen extends StatefulWidget {
   final int memoId;
@@ -32,6 +34,73 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
   Future<void> _loadMemo() async {
     final data = await MarkerDetailService.fetchMemoDetail(widget.memoId);
     setState(() => memo = data);
+  }
+
+  Future<void> launchGoogleMaps(double lat, double lng, String destName) async {
+    // 1) Android Google Maps 앱용 인텐트 URI
+    final googleMapsUri = Uri.parse('google.navigation:q=$lat,$lng&mode=w');
+    // 2) fallback) 웹 브라우저용 구글맵 방향 URL
+    final webUri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+
+    // 앱이 해당 인텐트를 처리할 수 있는지 확인
+    if (await canLaunchUrl(googleMapsUri)) {
+      await launchUrl(googleMapsUri);
+    } else if (await canLaunchUrl(webUri)) {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch map for $lat,$lng';
+    }
+  }
+
+  Future<void> launchKakaoMap(double lat, double lng, String destName) async {
+    // 이름에 공백, 한글 등이 들어갈 수 있으니 인코딩
+    final encodedName = Uri.encodeComponent(destName);
+
+    final appUri = Uri.parse('kakaomap://look?p=$lat,$lng');
+    final webUri =
+        Uri.parse('https://map.kakao.com/link/map/$encodedName,$lat,$lng');
+
+    if (await canLaunchUrl(appUri)) {
+      await launchUrl(appUri);
+    } else if (await canLaunchUrl(webUri)) {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch map for $lat,$lng';
+    }
+  }
+
+  void openMapNavigation(
+      BuildContext context, double lat, double lng, String destName) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext ctx) {
+        return SafeArea(
+          bottom: true, // 제스처 영역 고려
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.map),
+                title: const Text('구글 지도'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await launchGoogleMaps(lat, lng, destName);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.map_outlined),
+                title: const Text('카카오 지도'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await launchKakaoMap(lat, lng, destName);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -201,9 +270,9 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                 markerId: const MarkerId('loc'),
                 position: LatLng(memo!['lat'], memo!['lng']))
           },
-          zoomControlsEnabled: false,
-          liteModeEnabled: true,
-          myLocationButtonEnabled: false,
+          zoomControlsEnabled: true,
+          //liteModeEnabled: true,
+          myLocationButtonEnabled: true,
         ),
       ),
     );
@@ -230,7 +299,18 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
         ),
         Text('${m['hateCnt'] ?? 0}'),
         const Spacer(),
-        if (isLoggedIn) _buildPopupMenu(),
+        IconButton(
+          icon: Icon(Icons.navigation_rounded, color: mainColor),
+          onPressed: () {
+            openMapNavigation(context, m['lat'], m['lng'], m['title']);
+          },
+        ),
+        if (isLoggedIn) ...[
+          const SizedBox(
+            width: 1,
+          ),
+          _buildPopupMenu()
+        ],
       ],
     );
   }
