@@ -112,18 +112,15 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
       backgroundColor: Colors.white,
       body: memo == null
           ? const Center(child: CircularProgressIndicator())
-          : Stack(
+          : Column(
               children: [
-                // 1) 스크롤 영역: 아래에 충분한 padding(bottom) 주기
-                Padding(
-                  padding: EdgeInsets.only(bottom: isLoggedIn ? 80 : 0),
+                Expanded(
                   child: SingleChildScrollView(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ... 기존 _buildHeader(), 내용, 이미지, 지도, 리액션, 댓글 리스트 등
                         _buildHeader(),
                         const Divider(),
                         Text(memo!['content'] ?? ''),
@@ -137,28 +134,24 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
                         _buildReactions(isLoggedIn),
                         const Divider(),
                         CommentView(
-                            key: ValueKey(widget.memoId),
-                            memoId: widget.memoId),
+                          key: ValueKey(widget.memoId),
+                          memoId: widget.memoId,
+                        ),
                       ],
                     ),
                   ),
                 ),
 
-                // 2) 입력바를 화면 맨 아래에 고정
+                // 화면 맨 아래에 고정된 입력창
                 if (isLoggedIn)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      color: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: SafeArea(
-                        top: false,
-                        bottom: true,
-                        child: CommentInputBar(memoId: widget.memoId),
-                      ),
+                  Container(
+                    color: Colors.white,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: SafeArea(
+                      top: false,
+                      bottom: true,
+                      child: CommentInputBar(memoId: widget.memoId),
                     ),
                   ),
               ],
