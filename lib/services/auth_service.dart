@@ -93,8 +93,8 @@ class AuthService {
       }
     } catch (error) {
       if (error is DioException) {
-        if (error.response?.statusCode == 400) {
-          print('유저 정보 요청 실패 (400), 토큰 재발급 시도');
+        if (error.response?.statusCode == 401) {
+          print('유저 정보 요청 실패 (401), 토큰 재발급 시도');
           return await expiredToken(userProvider);
         }
       }
