@@ -279,16 +279,20 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
         IconButton(
           visualDensity: VisualDensity.compact,
           onPressed: isLoggedIn ? () => _toggleLike(id) : null,
-          icon: Icon(Icons.thumb_up,
-              color: isLoggedIn ? Colors.yellow : Colors.grey),
+          icon: Icon(
+              m['myLike'] == true ? Icons.thumb_up : Icons.thumb_up_outlined,
+              color: isLoggedIn ? mainColor : Colors.grey),
         ),
         Text('${m['likeCnt'] ?? 0}'),
         const SizedBox(width: 16),
         IconButton(
           visualDensity: VisualDensity.compact,
           onPressed: isLoggedIn ? () => _toggleHate(id) : null,
-          icon: Icon(Icons.thumb_down,
-              color: isLoggedIn ? Colors.yellow : Colors.grey),
+          icon: Icon(
+              m['myHate'] == true
+                  ? Icons.thumb_down
+                  : Icons.thumb_down_outlined,
+              color: isLoggedIn ? mainColor : Colors.grey),
         ),
         Text('${m['hateCnt'] ?? 0}'),
         const Spacer(),
@@ -311,16 +315,12 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
   Future<void> _toggleLike(int id) async {
     if (await LikeService.likeMemo(id)) {
       await _loadMemo();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('좋아요!')));
     }
   }
 
   Future<void> _toggleHate(int id) async {
     if (await LikeService.hateMemo(id)) {
       await _loadMemo();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('싫어요')));
     }
   }
 

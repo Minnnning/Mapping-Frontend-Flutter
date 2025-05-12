@@ -342,6 +342,7 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
   Widget _buildReactions(bool isLoggedIn) {
     final id = context.read<MarkerProvider>().selectedMarkerId;
     final d = memoDetail!;
+
     return Row(
       children: [
         IconButton(
@@ -351,13 +352,13 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                   final ok = await LikeService.likeMemo(id);
                   if (ok) {
                     await _fetchDetail(id);
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('좋아요!')));
                   }
                 }
               : null,
-          icon: Icon(Icons.thumb_up,
-              color: isLoggedIn ? Colors.yellow : Colors.grey),
+          icon: Icon(
+            d['myLike'] == true ? Icons.thumb_up : Icons.thumb_up_outlined,
+            color: isLoggedIn ? mainColor : Colors.grey,
+          ),
         ),
         Text('${d['likeCnt'] ?? 0}'),
         const SizedBox(width: 16),
@@ -368,13 +369,13 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
                   final ok = await LikeService.hateMemo(id);
                   if (ok) {
                     await _fetchDetail(id);
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('싫어요')));
                   }
                 }
               : null,
-          icon: Icon(Icons.thumb_down,
-              color: isLoggedIn ? Colors.yellow : Colors.grey),
+          icon: Icon(
+            d['myHate'] == true ? Icons.thumb_down : Icons.thumb_down_outlined,
+            color: isLoggedIn ? mainColor : Colors.grey,
+          ),
         ),
         Text('${d['hateCnt'] ?? 0}'),
         const Spacer(),
@@ -385,10 +386,8 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
           },
         ),
         if (isLoggedIn) ...[
-          const SizedBox(
-            width: 1,
-          ),
-          _buildPopupMenu(d)
+          const SizedBox(width: 1),
+          _buildPopupMenu(d),
         ],
       ],
     );
