@@ -1,3 +1,4 @@
+//login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/colors.dart';
@@ -50,7 +51,7 @@ class LoginScreen extends StatelessWidget {
                 buildProfileSection(context, user),
                 buildDivider(),
                 user == null
-                    ? buildLoginButton(context)
+                    ? buildLoginButtons(context)
                     : buildUserActions(context, user),
                 if (user != null) buildBlockedUsersButton(context),
                 buildDivider(),
@@ -154,25 +155,38 @@ class LoginScreen extends StatelessWidget {
   }
 
   /// 로그인 버튼 섹션 (로그인하지 않은 경우)
-  Widget buildLoginButton(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: boxGray,
-        borderRadius: BorderRadius.circular(9),
-      ),
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      width: double.infinity,
-      child: GestureDetector(
-        onTap: () => _handleLogin(context),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Image.asset(
-            'assets/images/kakao_login_large_wide.png',
-            height: 40,
-          ),
-        ),
-      ),
+  Widget buildLoginButtons(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ─── 카카오 로그인 버튼 ─────────────────────────────────────────────
+        Container(
+            decoration: BoxDecoration(
+              color: boxGray,
+              borderRadius: BorderRadius.circular(9),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 64.0, vertical: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0),
+            width: double.infinity,
+            child: Column(
+              children: [
+                socialLoginButton(
+                  assetPath: 'assets/images/google.png',
+                  text: 'Google 로그인',
+                  backgroundColor: Colors.white,
+                  onPressed: () => _handleLogin(context),
+                ),
+                const SizedBox(height: 16),
+                // 카카오 로그인 버튼
+                socialLoginButton(
+                  assetPath: 'assets/images/kakao.png',
+                  text: '카카오 로그인',
+                  backgroundColor: Color(0xFFFFE812), // 카카오 옐로우
+                  onPressed: () => _handleLogin(context),
+                ),
+              ],
+            )),
+      ],
     );
   }
 
@@ -344,6 +358,57 @@ Widget buildWithdrawalButton(BuildContext context) {
     child: const Text(
       '회원 탈퇴',
       style: TextStyle(color: Colors.grey),
+    ),
+  );
+}
+
+Widget socialLoginButton({
+  required String assetPath,
+  required String text,
+  required Color backgroundColor,
+  required VoidCallback onPressed,
+  double height = 40,
+  double iconSize = 24,
+  double kakaoIconScale = 1.3, // 카카오일 때 아이콘 크기 배율
+  double borderRadius = 8,
+  double horizontalPadding = 16,
+  double iconTextSpacing = 12,
+  TextStyle? textStyle,
+}) {
+  // “카카오 로그인” 버튼이라면 아이콘을 좀 더 크게
+  // final double resolvedIconSize =
+  //     text.contains('카카오') ? iconSize * kakaoIconScale : iconSize;
+  return Material(
+    color: backgroundColor,
+    borderRadius: BorderRadius.circular(borderRadius),
+    child: InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: Container(
+        height: height,
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              assetPath,
+              width: iconSize,
+              height: iconSize,
+            ),
+            Spacer(),
+            Text(
+              text,
+              style: textStyle ??
+                  TextStyle(
+                    color: Colors.black87,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                  ),
+            ),
+            Spacer(),
+          ],
+        ),
+      ),
     ),
   );
 }

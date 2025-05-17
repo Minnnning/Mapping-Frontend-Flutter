@@ -26,6 +26,7 @@ android {
         applicationId = "com.min.MappingApp"
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = localProperties.getProperty("KAKAO_NATIVE_APP_KEY")
         manifestPlaceholders["GOOGLE_MAP_API_KEY"] = localProperties.getProperty("GOOGLE_MAP_API_KEY")
+        manifestPlaceholders["ANDROID_CLIENT_ID"] = localProperties.getProperty("ANDROID_CLIENT_ID")
         minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
