@@ -1,6 +1,7 @@
 //auth_service.dart
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:dio/dio.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
@@ -10,7 +11,7 @@ class AuthService {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // 카카오 로그인
-  Future<UserModel?> login(UserProvider userProvider) async {
+  Future<UserModel?> kakaoLogin(UserProvider userProvider) async {
     try {
       OAuthToken token;
       if (await isKakaoTalkInstalled()) {
@@ -54,6 +55,69 @@ class AuthService {
       }
     } catch (error) {
       print('카카오 로그인 실패: $error');
+      return null;
+    }
+  }
+
+  //구글 로그인
+  Future<UserModel?> googleLogin(UserProvider userProvider) async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+
+      // 1) 구글 로그인 UI
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        print('Google 로그인 취소');
+        return null;
+      }
+
+      // 2) 액세스 토큰 획득
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? googleAccessToken = googleAuth.accessToken;
+
+      if (googleAccessToken == null) {
+        print('❌ Google 액세스 토큰 획득 실패');
+        return null;
+      }
+      print('Google 로그인 성공, 토큰: $googleAccessToken');
+
+      // 3) 내 백엔드로 전송
+      final response = await _dio.post(
+        'https://api.mapping.kro.kr/api/v2/member/google-login',
+        options: Options(
+          headers: {
+            'accept': '*/*',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {'accessToken': googleAccessToken},
+      );
+
+      // 4) 응답 처리 (카카오와 동일하게)
+      if (response.statusCode == 200 && response.data['success']) {
+        final data = response.data['data'];
+        final String newAccessToken = data['tokens']['accessToken'];
+        final String refreshToken = data['tokens']['refreshToken'];
+
+        // Secure Storage에 저장
+        await _secureStorage.write(key: 'accessToken', value: newAccessToken);
+        await _secureStorage.write(key: 'refreshToken', value: refreshToken);
+        print('서버 토큰 저장 완료 (Google)');
+
+        // UserModel 생성 & Provider에 저장
+        UserModel user = UserModel.fromJson(data);
+        userProvider.setUser(user);
+
+        return user;
+      } else {
+        print('서버 로그인 실패 (Google): ${response.data}');
+        return null;
+      }
+    } catch (error) {
+      print('Google 로그인 에러: $error');
       return null;
     }
   }

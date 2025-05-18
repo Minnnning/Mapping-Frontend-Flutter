@@ -15,9 +15,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
-  Future<void> _handleLogin(BuildContext context) async {
+  Future<void> _kakaoLogin(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    await AuthService().login(userProvider);
+    await AuthService().kakaoLogin(userProvider);
+  }
+
+  Future<void> _googleLogin(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await AuthService().googleLogin(userProvider);
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -174,7 +179,7 @@ class LoginScreen extends StatelessWidget {
                   assetPath: 'assets/images/google.png',
                   text: 'Google 로그인',
                   backgroundColor: Colors.white,
-                  onPressed: () => _handleLogin(context),
+                  onPressed: () => _googleLogin(context),
                 ),
                 const SizedBox(height: 16),
                 // 카카오 로그인 버튼
@@ -182,7 +187,7 @@ class LoginScreen extends StatelessWidget {
                   assetPath: 'assets/images/kakao.png',
                   text: '카카오 로그인',
                   backgroundColor: Color(0xFFFFE812), // 카카오 옐로우
-                  onPressed: () => _handleLogin(context),
+                  onPressed: () => _kakaoLogin(context),
                 ),
               ],
             )),
