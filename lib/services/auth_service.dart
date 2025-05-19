@@ -3,6 +3,7 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
 
@@ -61,66 +62,65 @@ class AuthService {
 
   //구글 로그인
   Future<UserModel?> googleLogin(UserProvider userProvider) async {
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
+  try {
+    await dotenv.load(fileName: '.env');
+    final serverClientId = dotenv.env['ANDROID_CLIENT_ID'];
 
-      // 1) 구글 로그인 UI
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        print('Google 로그인 취소');
-        return null;
-      }
+    if (serverClientId == null) {
+      throw Exception('ANDROID_CLIENT_ID is not set in the .env file');
+    }
 
-      // 2) 액세스 토큰 획득
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final String? googleAccessToken = googleAuth.accessToken;
+    final GoogleSignIn googleSignIn = GoogleSignIn(
+      scopes: ['email', 'profile'],
+      serverClientId: serverClientId, // serverClientId 지정
+    );
 
-      if (googleAccessToken == null) {
-        print('❌ Google 액세스 토큰 획득 실패');
-        return null;
-      }
-      print('Google 로그인 성공, 토큰: $googleAccessToken');
-
-      // 3) 내 백엔드로 전송
-      final response = await _dio.post(
-        'https://api.mapping.kro.kr/api/v2/member/google-login',
-        options: Options(
-          headers: {
-            'accept': '*/*',
-            'Content-Type': 'application/json',
-          },
-        ),
-        data: {'accessToken': googleAccessToken},
-      );
-
-      // 4) 응답 처리 (카카오와 동일하게)
-      if (response.statusCode == 200 && response.data['success']) {
-        final data = response.data['data'];
-        final String newAccessToken = data['tokens']['accessToken'];
-        final String refreshToken = data['tokens']['refreshToken'];
-
-        // Secure Storage에 저장
-        await _secureStorage.write(key: 'accessToken', value: newAccessToken);
-        await _secureStorage.write(key: 'refreshToken', value: refreshToken);
-        print('서버 토큰 저장 완료 (Google)');
-
-        // UserModel 생성 & Provider에 저장
-        UserModel user = UserModel.fromJson(data);
-        userProvider.setUser(user);
-
-        return user;
-      } else {
-        print('서버 로그인 실패 (Google): ${response.data}');
-        return null;
-      }
-    } catch (error) {
-      print('Google 로그인 에러: $error');
+    // 1) 구글 로그인 UI
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if (googleUser == null) {
+      print('Google 로그인 취소');
       return null;
     }
+
+    // 2) Authorization Code 바로 꺼내기
+    final String? authCode = googleUser.serverAuthCode;
+    print('DEBUG serverAuthCode: $authCode');
+
+    if (authCode == null) {
+      print('❌ serverAuthCode 획득 실패');
+      return null;
+    }
+
+    // 3) 서버에 code 파라미터로 전송
+    final response = await _dio.post(
+      'https://api.mapping.kro.kr/api/v2/member/google-login',
+      options: Options(headers: {'accept': '*/*'}),
+      queryParameters: {'code': authCode},
+      data: {},
+    );
+
+    // 4) 응답 처리
+    if (response.statusCode == 200 && response.data['success']) {
+      final data = response.data['data'];
+      final String newAccessToken = data['tokens']['accessToken'];
+      final String refreshToken = data['tokens']['refreshToken'];
+
+      await _secureStorage.write(key: 'accessToken', value: newAccessToken);
+      await _secureStorage.write(key: 'refreshToken', value: refreshToken);
+      final user = UserModel.fromJson(data);
+      userProvider.setUser(user);
+      print('서버 토큰 저장 완료 (Google)');
+      return user;
+    } else {
+      print('서버 로그인 실패 (Google): ${response.data}');
+      return null;
+    }
+  } catch (e) {
+    print('Google 로그인 에러: $e');
+    return null;
   }
+}
+
 
   // 유저 정보 가져오기
   Future<UserModel?> fetchUser(UserProvider userProvider) async {
@@ -175,6 +175,12 @@ class AuthService {
       await _secureStorage.delete(key: 'refreshToken');
 
       userProvider.clearUser(); // ✅ 유저 정보 초기화
+
+      //GoogleSignIn 세션 완전 해제
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email','profile'],
+      );
+      await googleSignIn.disconnect();
 
       print('로그아웃 완료');
     } catch (error) {
