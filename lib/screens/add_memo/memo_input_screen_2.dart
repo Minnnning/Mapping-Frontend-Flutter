@@ -186,6 +186,7 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
                     DropdownMenuItem(value: "주차장", child: Text("주차장")),
                     DropdownMenuItem(value: "쓰레기통", child: Text("쓰레기통")),
                     DropdownMenuItem(value: "흡연장", child: Text("흡연장")),
+                    DropdownMenuItem(value: "사진명소", child: Text("사진명소")),
                     DropdownMenuItem(value: "기타", child: Text("기타")),
                   ],
                   onChanged: (value) {

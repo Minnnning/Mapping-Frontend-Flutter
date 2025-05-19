@@ -81,6 +81,9 @@ class MarkerService {
       case '주차장':
         return await BitmapDescriptor.asset(
             ImageConfiguration(), 'assets/icons/parking_icon.png');
+      case '사진명소':
+        return await BitmapDescriptor.asset(
+            ImageConfiguration(), 'assets/icons/photo_icon.png');
       default:
         return await BitmapDescriptor.asset(
             ImageConfiguration(), 'assets/icons/guitar_icon.png');
