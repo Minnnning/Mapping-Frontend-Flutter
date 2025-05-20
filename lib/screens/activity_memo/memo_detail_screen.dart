@@ -112,49 +112,56 @@ class _MemoDetailScreenState extends State<MemoDetailScreen> {
       backgroundColor: Colors.white,
       body: memo == null
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeader(),
-                        const Divider(),
-                        Text(memo!['content'] ?? ''),
-                        const SizedBox(height: 8),
-                        if (_hasImages) _buildImageList(),
-                        if (_hasLocation) ...[
-                          const SizedBox(height: 16),
-                          _buildMap(),
+          : Listener(
+              behavior: HitTestBehavior.translucent,
+              onPointerDown: (_) {
+                // 화면 어디를 눌러도 포커스 해제 → 키보드 내림
+                FocusScope.of(context).unfocus();
+              },
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(),
+                          const Divider(),
+                          Text(memo!['content'] ?? ''),
+                          const SizedBox(height: 8),
+                          if (_hasImages) _buildImageList(),
+                          if (_hasLocation) ...[
+                            const SizedBox(height: 16),
+                            _buildMap(),
+                          ],
+                          const SizedBox(height: 8),
+                          _buildReactions(isLoggedIn),
+                          const Divider(),
+                          CommentView(
+                            key: ValueKey(widget.memoId),
+                            memoId: widget.memoId,
+                          ),
                         ],
-                        const SizedBox(height: 8),
-                        _buildReactions(isLoggedIn),
-                        const Divider(),
-                        CommentView(
-                          key: ValueKey(widget.memoId),
-                          memoId: widget.memoId,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
 
-                // 화면 맨 아래에 고정된 입력창
-                if (isLoggedIn)
-                  Container(
-                    color: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: SafeArea(
-                      top: false,
-                      bottom: true,
-                      child: CommentInputBar(memoId: widget.memoId),
+                  // 화면 맨 아래에 고정된 입력창
+                  if (isLoggedIn)
+                    Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: SafeArea(
+                        top: false,
+                        bottom: true,
+                        child: CommentInputBar(memoId: widget.memoId),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
     );
   }

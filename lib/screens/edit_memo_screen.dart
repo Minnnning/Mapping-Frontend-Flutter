@@ -185,69 +185,77 @@ class _EditMemoScreenState extends State<EditMemoScreen> {
         ],
       ),
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: "제목",
-                  border: OutlineInputBorder(),
+      body: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) {
+          // 화면 어디를 눌러도 포커스 해제 → 키보드 내림
+          FocusScope.of(context).unfocus();
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: "제목",
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? "제목을 입력해주세요."
+                      : null,
                 ),
-                validator: (value) => value == null || value.trim().isEmpty
-                    ? "제목을 입력해주세요."
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _contentController,
-                decoration: const InputDecoration(
-                  labelText: "내용",
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _contentController,
+                  decoration: const InputDecoration(
+                    labelText: "내용",
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 5,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? "내용을 입력해주세요."
+                      : null,
                 ),
-                maxLines: 5,
-                validator: (value) => value == null || value.trim().isEmpty
-                    ? "내용을 입력해주세요."
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: "카테고리",
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  decoration: const InputDecoration(
+                    labelText: "카테고리",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: "공용 화장실", child: Text("공용 화장실")),
+                    DropdownMenuItem(value: "주차장", child: Text("주차장")),
+                    DropdownMenuItem(value: "쓰레기통", child: Text("쓰레기통")),
+                    DropdownMenuItem(value: "흡연장", child: Text("흡연장")),
+                    DropdownMenuItem(value: "사진명소", child: Text("사진명소")),
+                    DropdownMenuItem(value: "기타", child: Text("기타")),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    }
+                  },
                 ),
-                items: const [
-                  DropdownMenuItem(value: "공용 화장실", child: Text("공용 화장실")),
-                  DropdownMenuItem(value: "주차장", child: Text("주차장")),
-                  DropdownMenuItem(value: "쓰레기통", child: Text("쓰레기통")),
-                  DropdownMenuItem(value: "흡연장", child: Text("흡연장")),
-                  DropdownMenuItem(value: "기타", child: Text("기타")),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedCategory = value;
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-              _buildImagePreview(),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: _pickImage,
-                icon: const Icon(Icons.image, color: Colors.white),
-                label: const Text("이미지 추가"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: mainColor,
-                  foregroundColor: Colors.white,
+                const SizedBox(height: 16),
+                _buildImagePreview(),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image, color: Colors.white),
+                  label: const Text("이미지 추가"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainColor,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

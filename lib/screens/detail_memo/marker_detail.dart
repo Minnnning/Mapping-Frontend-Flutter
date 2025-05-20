@@ -171,89 +171,96 @@ class _ResizableDetailBarState extends State<ResizableDetailBar> {
       snap: true,
       snapSizes: const [0, 0.4, 0.9],
       builder: (context, scrollCtrl) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-          ),
-          child: Stack(
-            children: [
-              // 스크롤 가능한 메모 & 댓글 영역
-              Padding(
-                padding: EdgeInsets.only(
-                  bottom: isExpanded && isLoggedIn ? 70 : 0, // 입력바 높이만큼 패딩
-                ),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(16)),
-                    boxShadow: [
-                      BoxShadow(blurRadius: 10, color: Colors.black26)
-                    ],
+        return Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (_) {
+            // 메모/댓글 영역 어디를 눌러도 포커스 해제 → 키보드 내림
+            FocusScope.of(context).unfocus();
+          },
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+            ),
+            child: Stack(
+              children: [
+                // 스크롤 가능한 메모 & 댓글 영역
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: isExpanded && isLoggedIn ? 70 : 0, // 입력바 높이만큼 패딩
                   ),
-                  child: ListView(
-                    controller: scrollCtrl,
-                    padding: EdgeInsets.zero,
-                    children: [
-                      // drag handle
-                      Center(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                              color: Colors.grey[400],
-                              borderRadius: BorderRadius.circular(2)),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: memoDetail == null
-                            ? const Center(child: CircularProgressIndicator())
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildHeader(isLoggedIn),
-                                  const Divider(),
-                                  Text(memoDetail!['content'] ?? ''),
-                                  const SizedBox(height: 8),
-                                  if (memoDetail!['images'] != null &&
-                                      memoDetail!['images'].isNotEmpty)
-                                    _buildImageRow(),
-                                  const SizedBox(height: 8),
-                                  SizedBox(height: dynamicSpace),
-                                  _buildReactions(isLoggedIn),
-                                  const Divider(),
-                                  if (isExpanded)
-                                    CommentView(
-                                      key: ValueKey(id),
-                                      memoId: id,
-                                    ),
-                                ],
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              if (isExpanded && isLoggedIn)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 5, // 댓글입력의 위 아래 그림자가 보임
                   child: Container(
-                    color: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: CommentInputBar(
-                      memoId: context.read<MarkerProvider>().selectedMarkerId,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16)),
+                      boxShadow: [
+                        BoxShadow(blurRadius: 10, color: Colors.black26)
+                      ],
+                    ),
+                    child: ListView(
+                      controller: scrollCtrl,
+                      padding: EdgeInsets.zero,
+                      children: [
+                        // drag handle
+                        Center(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[400],
+                                borderRadius: BorderRadius.circular(2)),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: memoDetail == null
+                              ? const Center(child: CircularProgressIndicator())
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildHeader(isLoggedIn),
+                                    const Divider(),
+                                    Text(memoDetail!['content'] ?? ''),
+                                    const SizedBox(height: 8),
+                                    if (memoDetail!['images'] != null &&
+                                        memoDetail!['images'].isNotEmpty)
+                                      _buildImageRow(),
+                                    const SizedBox(height: 8),
+                                    SizedBox(height: dynamicSpace),
+                                    _buildReactions(isLoggedIn),
+                                    const Divider(),
+                                    if (isExpanded)
+                                      CommentView(
+                                        key: ValueKey(id),
+                                        memoId: id,
+                                      ),
+                                  ],
+                                ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-            ],
+
+                if (isExpanded && isLoggedIn)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 5, // 댓글입력의 위 아래 그림자가 보임
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: CommentInputBar(
+                        memoId: context.read<MarkerProvider>().selectedMarkerId,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },
