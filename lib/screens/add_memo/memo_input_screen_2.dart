@@ -145,95 +145,101 @@ class _MemoInputScreen2State extends State<MemoInputScreen2> {
         ],
       ),
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: "제목",
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) => value == null || value.trim().isEmpty
-                      ? "제목을 입력해주세요."
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _contentController,
-                  decoration: const InputDecoration(
-                    labelText: "내용",
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 5,
-                  validator: (value) => value == null || value.trim().isEmpty
-                      ? "내용을 입력해주세요."
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: "카테고리",
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: "공용 화장실", child: Text("공용 화장실")),
-                    DropdownMenuItem(value: "주차장", child: Text("주차장")),
-                    DropdownMenuItem(value: "쓰레기통", child: Text("쓰레기통")),
-                    DropdownMenuItem(value: "흡연장", child: Text("흡연장")),
-                    DropdownMenuItem(value: "사진명소", child: Text("사진명소")),
-                    DropdownMenuItem(value: "기타", child: Text("기타")),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _selectedCategory = value;
-                      });
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("프라이빗 설정"),
-                    Switch(
-                      value: _secret,
-                      onChanged: (value) {
-                        setState(() {
-                          _secret = value;
-                        });
-                      },
-                      //activeColor: mainColor, // 스위치 내부 색상
-                      activeTrackColor: mainColor, // 스위치 트랙 색상
+      body: Listener(
+        behavior: HitTestBehavior.translucent, // 빈 공간 터치도 모두 감지
+        onPointerDown: (_) {
+          FocusScope.of(context).unfocus(); // 포커스 해제 → 키보드 내림
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      labelText: "제목",
+                      border: OutlineInputBorder(),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (_selectedImages.isNotEmpty)
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _selectedImages.map((file) {
-                      return Image.file(file,
-                          width: 100, height: 100, fit: BoxFit.cover);
-                    }).toList(),
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? "제목을 입력해주세요."
+                        : null,
                   ),
-                ElevatedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.image, color: Colors.white),
-                  label: const Text("이미지 선택 (선택사항)"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainColor, // 버튼 배경색
-                    foregroundColor: Colors.white, // 아이콘과 텍스트 색
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _contentController,
+                    decoration: const InputDecoration(
+                      labelText: "내용",
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 5,
+                    validator: (value) => value == null || value.trim().isEmpty
+                        ? "내용을 입력해주세요."
+                        : null,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: const InputDecoration(
+                      labelText: "카테고리",
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: "공용 화장실", child: Text("공용 화장실")),
+                      DropdownMenuItem(value: "주차장", child: Text("주차장")),
+                      DropdownMenuItem(value: "쓰레기통", child: Text("쓰레기통")),
+                      DropdownMenuItem(value: "흡연장", child: Text("흡연장")),
+                      DropdownMenuItem(value: "사진명소", child: Text("사진명소")),
+                      DropdownMenuItem(value: "기타", child: Text("기타")),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("프라이빗 설정"),
+                      Switch(
+                        value: _secret,
+                        onChanged: (value) {
+                          setState(() {
+                            _secret = value;
+                          });
+                        },
+                        //activeColor: mainColor, // 스위치 내부 색상
+                        activeTrackColor: mainColor, // 스위치 트랙 색상
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (_selectedImages.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _selectedImages.map((file) {
+                        return Image.file(file,
+                            width: 100, height: 100, fit: BoxFit.cover);
+                      }).toList(),
+                    ),
+                  ElevatedButton.icon(
+                    onPressed: _pickImage,
+                    icon: const Icon(Icons.image, color: Colors.white),
+                    label: const Text("이미지 선택 (선택사항)"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: mainColor, // 버튼 배경색
+                      foregroundColor: Colors.white, // 아이콘과 텍스트 색
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

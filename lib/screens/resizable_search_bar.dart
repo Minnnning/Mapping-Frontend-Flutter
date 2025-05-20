@@ -30,53 +30,61 @@ class _ResizableSearchBarState extends State<ResizableSearchBar> {
       snap: true,
       snapSizes: const [0.15, 0.4, 0.90],
       builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-          ),
-          child: ListView(
-            controller: scrollController,
-            padding: EdgeInsets.zero,
-            children: [
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2),
+        return Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (_) {
+            // 모든 포인터 다운 이벤트에서 포커스 해제 → 키보드 내림
+            FocusScope.of(context).unfocus();
+          },
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+            ),
+            child: ListView(
+              controller: scrollController,
+              padding: EdgeInsets.zero,
+              children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: CustomSearchBar(
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                          });
-                        },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CustomSearchBar(
+                          sheetController: _controller, // 전달
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    const ProfileButton(),
-                  ],
+                      const SizedBox(width: 8),
+                      const ProfileButton(),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 3),
-              const CategoryBar(),
-              SearchResultList(
-                searchQuery: _searchQuery,
-                mapController: widget.mapController,
-                sheetController: _controller, // 전달
-              ),
-            ],
+                const SizedBox(height: 3),
+                const CategoryBar(),
+                SearchResultList(
+                  searchQuery: _searchQuery,
+                  mapController: widget.mapController,
+                  sheetController: _controller, // 전달
+                ),
+              ],
+            ),
           ),
         );
       },
