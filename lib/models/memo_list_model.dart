@@ -16,22 +16,22 @@ class MemoList {
     required this.likeCnt,
     required this.hateCnt,
     required this.images,
-    this.secret,
+    this.secret = false,
   });
 
   factory MemoList.fromJson(Map<String, dynamic> json) {
     return MemoList(
-      id: json['id'],
-      title: json['title'],
-      content: json['content'],
-      category: json['category'],
-      likeCnt: json['likeCnt'],
-      hateCnt: json['hateCnt'],
+      id: json['id'] as int,
+      title: json['title'] as String,
+      content: json['content'] as String,
+      category: json['category'] as String,
+      likeCnt: json['likeCnt'] as int,
+      hateCnt: json['hateCnt'] as int,
       images: (json['images'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
-          [], // 비어있는 경우 빈 리스트 반환
-      secret: json.containsKey('secret') ? json['secret'] : null,
+          [],
+      secret: json.containsKey('secret') && json['secret'] == true,
     );
   }
 }

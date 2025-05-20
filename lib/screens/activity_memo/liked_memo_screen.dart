@@ -78,9 +78,9 @@ class _LikedMemoScreenState extends State<LikedMemoScreen> {
                       children: [
                         Text(memo.content),
                         SizedBox(height: 4),
-                        Text('카테고리: ${memo.category}',
+                        Text(memo.category,
                             style: TextStyle(color: Colors.grey)),
-                        Text('좋아요: ${memo.likeCnt}, 싫어요: ${memo.hateCnt}',
+                        Text('좋아요: ${memo.likeCnt} 싫어요: ${memo.hateCnt}',
                             style: TextStyle(color: Colors.grey)),
                         if (memo.images.isNotEmpty)
                           Container(

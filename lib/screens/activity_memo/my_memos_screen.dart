@@ -78,9 +78,24 @@ class _MyMemoScreenState extends State<MyMemoScreen> {
                       children: [
                         Text(memo.content),
                         SizedBox(height: 4),
-                        Text('카테고리: ${memo.category}',
-                            style: TextStyle(color: Colors.grey)),
-                        Text('좋아요: ${memo.likeCnt}, 싫어요: ${memo.hateCnt}',
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              memo.category,
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            if (memo.secret == true) ...[
+                              const SizedBox(width: 4), // 아이콘과 텍스트 사이 간격
+                              Icon(
+                                Icons.lock,
+                                size: 16,
+                                color: Colors.black,
+                              ),
+                            ],
+                          ],
+                        ),
+                        Text('좋아요: ${memo.likeCnt} 싫어요: ${memo.hateCnt}',
                             style: TextStyle(color: Colors.grey)),
                         if (memo.images.isNotEmpty)
                           Container(
