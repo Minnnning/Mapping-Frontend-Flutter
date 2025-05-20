@@ -105,3 +105,6 @@ Temporary Items
 #flutter version 3.29 이후
 *.cxx
 app/.cxx/*
+
+key.properties
+my-release-key.jks
